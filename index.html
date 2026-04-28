@@ -1693,23 +1693,13 @@ function getTimeRange() {
   const f = State.agents.timeFilter;
   const now = new Date();
   if (f === 'all') return null;
-  if (f === 'today') {
-    const s = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const e = new Date(s.getTime() + 24 * 3600 * 1000);
-    return { start: s, end: e };
-  }
-  if (f === 'week') {
-    const e = new Date(now);
-    const s = new Date(now.getTime() - 7 * 24 * 3600 * 1000);
-    return { start: s, end: e };
-  }
   if (f === 'month') {
     const s = new Date(now.getFullYear(), now.getMonth(), 1);
     const e = new Date(now.getFullYear(), now.getMonth() + 1, 1);
     return { start: s, end: e };
   }
   if (f === 'custom' && State.agents.customRange) {
-    return State.agents.customRange;
+    return { start: State.agents.customRange.start, end: State.agents.customRange.end };
   }
   return null;
 }
@@ -1831,11 +1821,9 @@ function renderTimeFilterRow() {
   const row = el('div', { class: 'time-filter-row' });
   const group = el('div', { class: 'time-filter-group' });
 
-  // 顺序：自定义 / 今日 / 近一周 / 本月 / 全部
+  // 顺序：自定义 / 本月 / 全部
   const buttons = [
     { key: 'custom', label: getCustomBtnLabel() },
-    { key: 'today',  label: '今日' },
-    { key: 'week',   label: '近一周' },
     { key: 'month',  label: '本月' },
     { key: 'all',    label: '全部' },
   ];
@@ -1868,8 +1856,9 @@ function renderTimeFilterRow() {
 
 function getCustomBtnLabel() {
   const r = State.agents.customRange;
-  if (State.agents.timeFilter === 'custom' && r) {
-    return fmtDateTime(r.start) + ' 至 ' + fmtDateTime(r.end);
+  if (State.agents.timeFilter === 'custom' && r && r.startMonth && r.endMonth) {
+    if (r.startMonth === r.endMonth) return r.startMonth;
+    return r.startMonth + ' 至 ' + r.endMonth;
   }
   return '自定义';
 }
@@ -1878,33 +1867,33 @@ function openCustomDatePopover() {
   // toggle popover
   State.agents.showDatePopover = !State.agents.showDatePopover;
   if (State.agents.showDatePopover && State.agents.customRange) {
-    State.agents.draftCustomStart = toDateTimeLocal(State.agents.customRange.start);
-    State.agents.draftCustomEnd = toDateTimeLocal(State.agents.customRange.end);
+    State.agents.draftCustomStart = State.agents.customRange.startMonth || '';
+    State.agents.draftCustomEnd = State.agents.customRange.endMonth || '';
   }
   renderApp();
 }
 
-function toDateTimeLocal(d) {
-  if (!d) return '';
-  const dt = (d instanceof Date) ? d : new Date(d);
-  return dt.getFullYear() + '-' + pad2(dt.getMonth() + 1) + '-' + pad2(dt.getDate())
-    + 'T' + pad2(dt.getHours()) + ':' + pad2(dt.getMinutes()) + ':' + pad2(dt.getSeconds());
+/* Convert 'YYYY-MM' string to a Date covering [startOfMonth, startOfNextMonth) */
+function monthStringToRange(startMonth, endMonth) {
+  const sm = startMonth.split('-');
+  const em = endMonth.split('-');
+  const start = new Date(parseInt(sm[0], 10), parseInt(sm[1], 10) - 1, 1);
+  const end = new Date(parseInt(em[0], 10), parseInt(em[1], 10), 1); // first of (endMonth + 1)
+  return { start: start, end: end };
 }
 
 function renderDatePopover() {
   const pop = el('div', { class: 'date-popover' });
 
   const startInput = el('input', {
-    type: 'datetime-local',
-    step: '1',
+    type: 'month',
     value: State.agents.draftCustomStart,
     onchange: function (ev) {
       State.agents.draftCustomStart = ev.target.value;
     },
   });
   const endInput = el('input', {
-    type: 'datetime-local',
-    step: '1',
+    type: 'month',
     value: State.agents.draftCustomEnd,
     onchange: function (ev) {
       State.agents.draftCustomEnd = ev.target.value;
@@ -1912,11 +1901,11 @@ function renderDatePopover() {
   });
 
   pop.appendChild(el('div', { class: 'row' }, [
-    el('label', { text: '开始时间' }),
+    el('label', { text: '开始月份' }),
     startInput,
   ]));
   pop.appendChild(el('div', { class: 'row' }, [
-    el('label', { text: '结束时间' }),
+    el('label', { text: '结束月份' }),
     endInput,
   ]));
 
@@ -1941,15 +1930,23 @@ function renderDatePopover() {
           renderApp();
           return;
         }
-        const sd = new Date(s);
-        const ed = new Date(e);
-        if (isNaN(sd.getTime()) || isNaN(ed.getTime())) {
+        // Validate format YYYY-MM
+        if (!/^\d{4}-\d{2}$/.test(s) || !/^\d{4}-\d{2}$/.test(e)) {
           State.agents.showDatePopover = false;
           renderApp();
           return;
         }
+        // Normalize: ensure start <= end (swap if needed)
+        let sm = s, em = e;
+        if (s > e) { sm = e; em = s; }
+        const rng = monthStringToRange(sm, em);
         State.agents.timeFilter = 'custom';
-        State.agents.customRange = { start: sd, end: ed };
+        State.agents.customRange = {
+          start: rng.start,
+          end: rng.end,
+          startMonth: sm,
+          endMonth: em,
+        };
         State.agents.showDatePopover = false;
         renderApp();
       },
