@@ -145,6 +145,235 @@
     text-align: center;
   }
 
+  /* ===== Time filter bar ===== */
+  .time-filter-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .time-filter-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: nowrap;
+    position: relative;
+  }
+  .time-btn {
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    color: #4b5563;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .time-btn:hover { border-color: #3b82f6; color: #3b82f6; }
+  .time-btn.active {
+    background: #3b82f6; border-color: #3b82f6; color: #fff;
+  }
+
+  /* ===== Date picker popover ===== */
+  .date-popover {
+    position: absolute;
+    top: calc(100% + 8px);
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    padding: 16px;
+    z-index: 50;
+    width: 360px;
+  }
+  .date-popover .row {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+  }
+  .date-popover label {
+    width: 70px; font-size: 13px; color: #374151;
+  }
+  .date-popover input[type="datetime-local"] {
+    flex: 1;
+    height: 32px;
+    padding: 0 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+  }
+  .date-popover .actions {
+    display: flex; justify-content: flex-end; gap: 8px;
+    margin-top: 12px; border-top: 1px solid #f3f4f6; padding-top: 12px;
+  }
+
+  /* ===== Metric cards ===== */
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .metric-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 18px 20px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+  .metric-label { font-size: 13px; color: #6b7280; margin-bottom: 8px; }
+  .metric-value { font-size: 26px; font-weight: 600; color: #1f2937; }
+
+  /* ===== Search bar ===== */
+  .search-bar {
+    background: #fff;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 20px;
+    align-items: center;
+  }
+  .search-field {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .search-field label {
+    font-size: 13px; color: #4b5563; white-space: nowrap;
+  }
+  .search-field .input { width: 180px; }
+  .search-field .input.small { width: 150px; }
+  .date-range {
+    display: flex; align-items: center; gap: 6px;
+  }
+  .date-range .input { width: 150px; }
+
+  /* ===== List card / table ===== */
+  .list-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    overflow: hidden;
+  }
+  .list-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid #f0f1f3;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .list-title {
+    font-weight: 600; font-size: 15px; color: #1f2937;
+  }
+  .data-table {
+    width: 100%;
+    font-size: 13px;
+  }
+  .data-table thead th {
+    background: #f8fafc;
+    color: #4b5563;
+    text-align: left;
+    padding: 10px 14px;
+    font-weight: 500;
+    border-bottom: 1px solid #e5e7eb;
+    white-space: nowrap;
+  }
+  .data-table tbody td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #f3f4f6;
+    color: #1f2937;
+    vertical-align: middle;
+  }
+  .data-table tbody tr:hover { background: #f9fafb; }
+  .data-table tbody tr:last-child td { border-bottom: none; }
+
+  .col-sortable {
+    cursor: pointer; user-select: none;
+  }
+  .col-sortable:hover { color: #3b82f6; }
+  .sort-ico {
+    display: inline-block;
+    margin-left: 4px;
+    color: #cbd5e1;
+    font-size: 10px;
+    line-height: 1;
+  }
+  .sort-ico.active { color: #3b82f6; }
+
+  .user-cell {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; flex-shrink: 0;
+  }
+  .nickname { color: #1f2937; }
+
+  .level-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 18px;
+    white-space: nowrap;
+  }
+  .level-1 { background: #dbeafe; color: #1d4ed8; }
+  .level-2 { background: #d1fae5; color: #047857; }
+  .level-3 { background: #ede9fe; color: #6d28d9; }
+  .level-4 { background: #ffedd5; color: #c2410c; }
+  .level-5 { background: #fee2e2; color: #b91c1c; }
+  .level-user { background: #f3f4f6; color: #6b7280; }
+
+  .link-num {
+    color: #3b82f6;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  .link-num:hover { color: #2563eb; }
+  .muted { color: #9ca3af; }
+
+  /* ===== Pagination ===== */
+  .pagination {
+    padding: 14px 20px;
+    border-top: 1px solid #f0f1f3;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: nowrap;
+  }
+  .page-size select {
+    height: 30px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 0 8px;
+    font-size: 13px;
+    background: #fff;
+    color: #374151;
+    font-family: inherit;
+  }
+  .page-buttons {
+    display: flex; align-items: center; gap: 4px;
+  }
+  .page-btn {
+    min-width: 30px;
+    height: 30px;
+    padding: 0 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #fff;
+    font-size: 13px;
+    color: #374151;
+  }
+  .page-btn:hover:not(:disabled) { border-color: #3b82f6; color: #3b82f6; }
+  .page-btn.active {
+    background: #3b82f6; border-color: #3b82f6; color: #fff;
+  }
+  .page-btn:disabled {
+    color: #cbd5e1; cursor: not-allowed; background: #f9fafb;
+  }
+  .page-total { color: #6b7280; font-size: 13px; white-space: nowrap; }
+
   /* ===== Modal ===== */
   .modal-mask {
     position: fixed; inset: 0;
@@ -210,7 +439,18 @@
 const State = {
   currentPage: 'agents',           // 'agents' | 'settlements' | 'bonus'
   breadcrumb: [],                  // [{id, name}] - excluding the root "代理列表"
-  // (additional state added in later phases)
+  agents: {
+    timeFilter: 'all',             // 'today' | 'week' | 'month' | 'all' | 'custom'
+    customRange: null,             // { start: Date, end: Date }
+    showDatePopover: false,
+    draftCustomStart: '',          // string in datetime-local format with seconds
+    draftCustomEnd: '',
+    search: { phone: '', name: '', dateFrom: '', dateTo: '' },
+    sortKey: '',                   // column key
+    sortDir: 'desc',               // 'asc' | 'desc'
+    page: 1,
+    pageSize: 20,
+  },
 };
 
 /* ============================================================
@@ -500,7 +740,7 @@ function avatarColor(seed) {
  * Router / Page rendering (skeleton — pages filled in next phases)
  * ============================================================ */
 const Pages = {
-  agents:       { label: '代理列表',  render: renderAgentsPagePlaceholder },
+  agents:       { label: '代理列表',  render: renderAgentsPage },
   settlements:  { label: '结算记录',  render: renderSettlementsPagePlaceholder },
   bonus:        { label: '奖金流水',  render: renderBonusPagePlaceholder },
 };
@@ -535,11 +775,7 @@ function renderApp() {
   Pages[State.currentPage].render(main);
 }
 
-/* Phase 1 placeholder renderers (replaced in later phases) */
-function renderAgentsPagePlaceholder(root) {
-  root.appendChild(el('div', { class: 'page-placeholder' },
-    '【代理列表】将在 Phase 2 实现'));
-}
+/* Placeholders for pages still to be implemented */
 function renderSettlementsPagePlaceholder(root) {
   root.appendChild(el('div', { class: 'page-placeholder' },
     '【结算记录】将在 Phase 4 实现'));
@@ -547,6 +783,587 @@ function renderSettlementsPagePlaceholder(root) {
 function renderBonusPagePlaceholder(root) {
   root.appendChild(el('div', { class: 'page-placeholder' },
     '【奖金流水】将在 Phase 5 实现'));
+}
+
+/* ============================================================
+ * Agent List page
+ * ============================================================ */
+
+/* Get the time-range [start, end) implied by the time filter.
+ * Returns null if filter is "全部". */
+function getTimeRange() {
+  const f = State.agents.timeFilter;
+  const now = new Date();
+  if (f === 'all') return null;
+  if (f === 'today') {
+    const s = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const e = new Date(s.getTime() + 24 * 3600 * 1000);
+    return { start: s, end: e };
+  }
+  if (f === 'week') {
+    const e = new Date(now);
+    const s = new Date(now.getTime() - 7 * 24 * 3600 * 1000);
+    return { start: s, end: e };
+  }
+  if (f === 'month') {
+    const s = new Date(now.getFullYear(), now.getMonth(), 1);
+    const e = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    return { start: s, end: e };
+  }
+  if (f === 'custom' && State.agents.customRange) {
+    return State.agents.customRange;
+  }
+  return null;
+}
+
+/* Compute three metrics based on time range. Mock approximation. */
+function computeAgentMetrics() {
+  const range = getTimeRange();
+  const allAgents = Object.values(Mock.people).filter(p => p.isAgent);
+  if (!range) {
+    const totalAgents = allAgents.length;
+    const totalReward = allAgents.reduce((s, a) => s + a.totalReward, 0);
+    // 已发放 = totalReward - balance（已结算/未结算的差额估算）
+    const totalPaidOut = allAgents.reduce((s, a) => s + Math.max(0, a.totalReward - a.balance), 0);
+    return {
+      label1: '代理总人数',     value1: fmtNumber(totalAgents),
+      label2: '累计总奖励',     value2: fmtMoney(totalReward),
+      label3: '已发放奖励',     value3: fmtMoney(totalPaidOut),
+    };
+  }
+  const inRange = function (d) {
+    if (!d) return false;
+    const t = (d instanceof Date ? d : new Date(d)).getTime();
+    return t >= range.start.getTime() && t < range.end.getTime();
+  };
+  const newAgents = allAgents.filter(a => inRange(a.becomeAgentTime)).length;
+  // mock 随机但稳定：根据范围长度按比例计算
+  const days = Math.max(1, (range.end.getTime() - range.start.getTime()) / 86400000);
+  const allRewardSum = allAgents.reduce((s, a) => s + a.totalReward, 0);
+  const allPaidSum = allAgents.reduce((s, a) => s + Math.max(0, a.totalReward - a.balance), 0);
+  const factor = Math.min(1, days / 180);
+  const newReward = Math.round(allRewardSum * factor * 0.6 * 100) / 100;
+  const newPaid = Math.round(allPaidSum * factor * 0.55 * 100) / 100;
+  return {
+    label1: '该时段新增代理数', value1: fmtNumber(newAgents),
+    label2: '该时段新产生奖励', value2: fmtMoney(newReward),
+    label3: '该时段完成发放金额', value3: fmtMoney(newPaid),
+  };
+}
+
+/* Get the list of people to show.
+ * No breadcrumb -> all agents (no regular users).
+ * With breadcrumb -> direct children of last breadcrumb agent (mix in regular users). */
+function getDisplayedPeople() {
+  if (!State.breadcrumb.length) {
+    return Object.values(Mock.people).filter(p => p.isAgent);
+  }
+  const last = State.breadcrumb[State.breadcrumb.length - 1];
+  const parent = Mock.people[last.id];
+  if (!parent) return [];
+  return parent.childrenIds.map(id => Mock.people[id]);
+}
+
+/* Apply search-bar filters to the people list */
+function applyAgentSearch(list) {
+  const s = State.agents.search;
+  return list.filter(function (p) {
+    if (s.phone && !p.phone.includes(s.phone)) return false;
+    if (s.name && !p.name.includes(s.name)) return false;
+    if (s.dateFrom) {
+      if (!p.becomeAgentTime) return false;
+      if (p.becomeAgentTime.getTime() < new Date(s.dateFrom).getTime()) return false;
+    }
+    if (s.dateTo) {
+      if (!p.becomeAgentTime) return false;
+      const endOfDay = new Date(s.dateTo);
+      endOfDay.setHours(23, 59, 59, 999);
+      if (p.becomeAgentTime.getTime() > endOfDay.getTime()) return false;
+    }
+    return true;
+  });
+}
+
+/* Sort with "-" (regular-user blank fields) always at end */
+function applyAgentSort(list) {
+  const key = State.agents.sortKey;
+  if (!key) return list;
+  const dir = State.agents.sortDir === 'asc' ? 1 : -1;
+  // For each row, get the sort value; if "-" (e.g., regular user fields), goes last
+  function getValue(p) {
+    switch (key) {
+      case 'directInvites': return p.isAgent ? p.directInvites : null;
+      case 'teamTotal':     return p.isAgent ? p.teamTotal : null;
+      case 'totalPaid':     return p.totalPaid != null ? p.totalPaid : null;
+      case 'totalReward':   return p.isAgent ? p.totalReward : null;
+      case 'balance':       return p.isAgent ? p.balance : null;
+      default: return null;
+    }
+  }
+  const arr = list.slice();
+  arr.sort(function (a, b) {
+    const va = getValue(a);
+    const vb = getValue(b);
+    const aNull = (va == null);
+    const bNull = (vb == null);
+    if (aNull && bNull) return 0;
+    if (aNull) return 1;     // null/"-" always last
+    if (bNull) return -1;
+    if (va < vb) return -1 * dir;
+    if (va > vb) return  1 * dir;
+    return 0;
+  });
+  return arr;
+}
+
+function renderAgentsPage(root) {
+  // 1. Time filter row
+  root.appendChild(renderTimeFilterRow());
+
+  // 2. Metric cards
+  root.appendChild(renderMetricCards());
+
+  // 3. Search bar
+  root.appendChild(renderAgentSearchBar());
+
+  // 4. List card with breadcrumb header + table + pagination
+  root.appendChild(renderAgentListCard());
+}
+
+function renderTimeFilterRow() {
+  const row = el('div', { class: 'time-filter-row' });
+  const group = el('div', { class: 'time-filter-group' });
+
+  // 顺序：自定义 / 今日 / 近一周 / 本月 / 全部
+  const buttons = [
+    { key: 'custom', label: getCustomBtnLabel() },
+    { key: 'today',  label: '今日' },
+    { key: 'week',   label: '近一周' },
+    { key: 'month',  label: '本月' },
+    { key: 'all',    label: '全部' },
+  ];
+  buttons.forEach(function (b) {
+    const isActive = State.agents.timeFilter === b.key;
+    const btn = el('button', {
+      class: 'time-btn' + (isActive ? ' active' : ''),
+      type: 'button',
+      onclick: function (ev) {
+        if (b.key === 'custom') {
+          openCustomDatePopover(ev);
+        } else {
+          State.agents.timeFilter = b.key;
+          State.agents.showDatePopover = false;
+          renderApp();
+        }
+      },
+    }, b.label);
+    group.appendChild(btn);
+  });
+
+  row.appendChild(group);
+
+  if (State.agents.showDatePopover) {
+    row.appendChild(renderDatePopover());
+  }
+
+  return row;
+}
+
+function getCustomBtnLabel() {
+  const r = State.agents.customRange;
+  if (State.agents.timeFilter === 'custom' && r) {
+    return fmtDateTime(r.start) + ' 至 ' + fmtDateTime(r.end);
+  }
+  return '自定义';
+}
+
+function openCustomDatePopover() {
+  // toggle popover
+  State.agents.showDatePopover = !State.agents.showDatePopover;
+  if (State.agents.showDatePopover && State.agents.customRange) {
+    State.agents.draftCustomStart = toDateTimeLocal(State.agents.customRange.start);
+    State.agents.draftCustomEnd = toDateTimeLocal(State.agents.customRange.end);
+  }
+  renderApp();
+}
+
+function toDateTimeLocal(d) {
+  if (!d) return '';
+  const dt = (d instanceof Date) ? d : new Date(d);
+  return dt.getFullYear() + '-' + pad2(dt.getMonth() + 1) + '-' + pad2(dt.getDate())
+    + 'T' + pad2(dt.getHours()) + ':' + pad2(dt.getMinutes()) + ':' + pad2(dt.getSeconds());
+}
+
+function renderDatePopover() {
+  const pop = el('div', { class: 'date-popover' });
+
+  const startInput = el('input', {
+    type: 'datetime-local',
+    step: '1',
+    value: State.agents.draftCustomStart,
+    onchange: function (ev) {
+      State.agents.draftCustomStart = ev.target.value;
+    },
+  });
+  const endInput = el('input', {
+    type: 'datetime-local',
+    step: '1',
+    value: State.agents.draftCustomEnd,
+    onchange: function (ev) {
+      State.agents.draftCustomEnd = ev.target.value;
+    },
+  });
+
+  pop.appendChild(el('div', { class: 'row' }, [
+    el('label', { text: '开始时间' }),
+    startInput,
+  ]));
+  pop.appendChild(el('div', { class: 'row' }, [
+    el('label', { text: '结束时间' }),
+    endInput,
+  ]));
+
+  pop.appendChild(el('div', { class: 'actions' }, [
+    el('button', {
+      class: 'btn',
+      type: 'button',
+      onclick: function () {
+        State.agents.draftCustomStart = '';
+        State.agents.draftCustomEnd = '';
+        renderApp();
+      },
+    }, '重置'),
+    el('button', {
+      class: 'btn btn-primary',
+      type: 'button',
+      onclick: function () {
+        const s = State.agents.draftCustomStart;
+        const e = State.agents.draftCustomEnd;
+        if (!s || !e) {
+          State.agents.showDatePopover = false;
+          renderApp();
+          return;
+        }
+        const sd = new Date(s);
+        const ed = new Date(e);
+        if (isNaN(sd.getTime()) || isNaN(ed.getTime())) {
+          State.agents.showDatePopover = false;
+          renderApp();
+          return;
+        }
+        State.agents.timeFilter = 'custom';
+        State.agents.customRange = { start: sd, end: ed };
+        State.agents.showDatePopover = false;
+        renderApp();
+      },
+    }, '确定'),
+  ]));
+
+  return pop;
+}
+
+function renderMetricCards() {
+  const m = computeAgentMetrics();
+  const wrap = el('div', { class: 'metrics' });
+  [
+    { label: m.label1, value: m.value1 },
+    { label: m.label2, value: m.value2 },
+    { label: m.label3, value: m.value3 },
+  ].forEach(function (it) {
+    wrap.appendChild(el('div', { class: 'metric-card' }, [
+      el('div', { class: 'metric-label', text: it.label }),
+      el('div', { class: 'metric-value', text: it.value }),
+    ]));
+  });
+  return wrap;
+}
+
+function renderAgentSearchBar() {
+  const bar = el('div', { class: 'search-bar' });
+  const s = State.agents.search;
+
+  const phoneInput = el('input', {
+    class: 'input small', type: 'text', placeholder: '请输入手机号',
+    value: s.phone,
+    oninput: function (ev) { s.phone = ev.target.value; },
+  });
+  const nameInput = el('input', {
+    class: 'input small', type: 'text', placeholder: '请输入昵称',
+    value: s.name,
+    oninput: function (ev) { s.name = ev.target.value; },
+  });
+  const fromInput = el('input', {
+    class: 'input', type: 'date',
+    value: s.dateFrom,
+    onchange: function (ev) { s.dateFrom = ev.target.value; },
+  });
+  const toInput = el('input', {
+    class: 'input', type: 'date',
+    value: s.dateTo,
+    onchange: function (ev) { s.dateTo = ev.target.value; },
+  });
+
+  bar.appendChild(el('div', { class: 'search-field' }, [
+    el('label', { text: '手机号' }), phoneInput,
+  ]));
+  bar.appendChild(el('div', { class: 'search-field' }, [
+    el('label', { text: '昵称' }), nameInput,
+  ]));
+  bar.appendChild(el('div', { class: 'search-field' }, [
+    el('label', { text: '成为代理时间' }),
+    el('div', { class: 'date-range' }, [
+      fromInput,
+      el('span', { text: '-' }),
+      toInput,
+    ]),
+  ]));
+  bar.appendChild(el('button', {
+    class: 'btn btn-primary', type: 'button',
+    onclick: function () {
+      State.agents.page = 1;
+      renderApp();
+    },
+  }, '搜索'));
+
+  return bar;
+}
+
+function renderAgentListCard() {
+  const card = el('div', { class: 'list-card' });
+
+  // List header — Phase 3 will replace with breadcrumbs
+  const header = el('div', { class: 'list-header' });
+  header.appendChild(el('div', { class: 'list-title', text: '代理列表' }));
+  card.appendChild(header);
+
+  // Compute displayed list
+  let list = getDisplayedPeople();
+  list = applyAgentSearch(list);
+  list = applyAgentSort(list);
+
+  // Pagination slice
+  const total = list.length;
+  const pageSize = State.agents.pageSize;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  if (State.agents.page > totalPages) State.agents.page = totalPages;
+  const start = (State.agents.page - 1) * pageSize;
+  const pageItems = list.slice(start, start + pageSize);
+
+  // Table
+  card.appendChild(renderAgentTable(pageItems));
+
+  // Pagination bar
+  card.appendChild(renderPagination(total, State.agents.page, pageSize, function (newPage, newSize) {
+    if (newSize != null) {
+      State.agents.pageSize = newSize;
+      State.agents.page = 1;
+    } else {
+      State.agents.page = newPage;
+    }
+    renderApp();
+  }));
+
+  return card;
+}
+
+function renderAgentTable(items) {
+  const table = el('table', { class: 'data-table' });
+  const thead = el('thead');
+  const trh = el('tr');
+
+  function sortIcon(key) {
+    if (State.agents.sortKey === key) {
+      return el('span', { class: 'sort-ico active', text: State.agents.sortDir === 'asc' ? '▲' : '▼' });
+    }
+    return el('span', { class: 'sort-ico', text: '▲▼' });
+  }
+  function sortableTh(label, key) {
+    return el('th', {
+      class: 'col-sortable',
+      onclick: function () {
+        if (State.agents.sortKey === key) {
+          State.agents.sortDir = (State.agents.sortDir === 'asc') ? 'desc' : 'asc';
+        } else {
+          State.agents.sortKey = key;
+          State.agents.sortDir = 'asc';
+        }
+        renderApp();
+      },
+    }, [document.createTextNode(label), sortIcon(key)]);
+  }
+
+  trh.appendChild(el('th', { text: '昵称' }));
+  trh.appendChild(el('th', { text: '手机号' }));
+  trh.appendChild(el('th', { text: '当前层级' }));
+  trh.appendChild(sortableTh('直邀人数', 'directInvites'));
+  trh.appendChild(sortableTh('团队总人数', 'teamTotal'));
+  trh.appendChild(sortableTh('累计付费', 'totalPaid'));
+  trh.appendChild(sortableTh('累计奖励', 'totalReward'));
+  trh.appendChild(sortableTh('奖励余额', 'balance'));
+  trh.appendChild(el('th', { text: '成为代理时间' }));
+  thead.appendChild(trh);
+  table.appendChild(thead);
+
+  const tbody = el('tbody');
+  if (!items.length) {
+    const tr = el('tr');
+    tr.appendChild(el('td', { colspan: '9' }, [el('div', { class: 'empty', text: '暂无数据' })]));
+    tbody.appendChild(tr);
+  } else {
+    items.forEach(function (p) {
+      tbody.appendChild(renderAgentRow(p));
+    });
+  }
+  table.appendChild(tbody);
+  return table;
+}
+
+function renderAgentRow(p) {
+  const tr = el('tr');
+
+  // 昵称（头像 + 名字）
+  const userCell = el('td');
+  userCell.appendChild(el('div', { class: 'user-cell' }, [
+    el('div', { class: 'avatar', style: 'background:' + avatarColor(p.id), text: p.avatar }),
+    el('span', { class: 'nickname', text: p.name }),
+  ]));
+  tr.appendChild(userCell);
+
+  // 手机号（完整显示）
+  tr.appendChild(el('td', { text: p.phone }));
+
+  // 当前层级
+  const levelTd = el('td');
+  levelTd.appendChild(renderLevelTag(p));
+  tr.appendChild(levelTd);
+
+  if (p.isAgent) {
+    // 直邀人数
+    tr.appendChild(el('td', { text: fmtNumber(p.directInvites) }));
+    // 团队总人数（数字可点击）
+    const teamTd = el('td');
+    if (p.teamTotal > 0) {
+      teamTd.appendChild(el('span', {
+        class: 'link-num',
+        text: fmtNumber(p.teamTotal),
+        onclick: function () { drillIntoTeam(p); },
+      }));
+    } else {
+      teamTd.appendChild(el('span', { class: 'link-num', text: '0',
+        onclick: function () { drillIntoTeam(p); }
+      }));
+    }
+    tr.appendChild(teamTd);
+    // 累计付费
+    tr.appendChild(el('td', { text: fmtMoney(p.totalPaid) }));
+    // 累计奖励
+    tr.appendChild(el('td', { text: fmtMoney(p.totalReward) }));
+    // 奖励余额
+    tr.appendChild(el('td', { text: fmtMoney(p.balance) }));
+    // 成为代理时间
+    tr.appendChild(el('td', { text: fmtDate(p.becomeAgentTime) }));
+  } else {
+    // 普通用户：除「累计付费」外其他列全部 "-"
+    tr.appendChild(el('td', [el('span', { class: 'muted', text: '-' })]));
+    tr.appendChild(el('td', [el('span', { class: 'muted', text: '-' })]));
+    tr.appendChild(el('td', { text: fmtMoney(p.totalPaid) }));
+    tr.appendChild(el('td', [el('span', { class: 'muted', text: '-' })]));
+    tr.appendChild(el('td', [el('span', { class: 'muted', text: '-' })]));
+    tr.appendChild(el('td', [el('span', { class: 'muted', text: '-' })]));
+  }
+
+  return tr;
+}
+
+function renderLevelTag(p) {
+  if (!p.isAgent) {
+    return el('span', { class: 'level-tag level-user', text: '普通用户' });
+  }
+  const lv = Math.min(5, p.level || 1);
+  const text = lv + ' 级代理';
+  return el('span', { class: 'level-tag level-' + lv, text: text });
+}
+
+/* Drill into a team — Phase 3 fully wires breadcrumb behavior. */
+function drillIntoTeam(agent) {
+  State.breadcrumb.push({ id: agent.id, name: agent.name });
+  State.agents.page = 1;
+  renderApp();
+}
+
+/* Generic pagination renderer. onChange(newPage, newPageSize | null) */
+function renderPagination(total, page, pageSize, onChange) {
+  const wrap = el('div', { class: 'pagination' });
+
+  // Left: page-size selector
+  const sizeWrap = el('div', { class: 'page-size' });
+  const select = el('select', {
+    onchange: function (ev) {
+      onChange(1, parseInt(ev.target.value, 10));
+    },
+  });
+  [20, 50, 100, 500].forEach(function (sz) {
+    const opt = el('option', { value: String(sz), text: '每页 ' + sz + ' 条' });
+    if (sz === pageSize) opt.selected = true;
+    select.appendChild(opt);
+  });
+  sizeWrap.appendChild(select);
+  wrap.appendChild(sizeWrap);
+
+  // Middle: page buttons
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const pBtns = el('div', { class: 'page-buttons' });
+  pBtns.appendChild(el('button', {
+    class: 'page-btn',
+    type: 'button',
+    disabled: page <= 1 ? 'disabled' : null,
+    onclick: function () { if (page > 1) onChange(page - 1, null); },
+  }, '‹ 上一页'));
+
+  // Page numbers (compact: show up to 5 numbers around current)
+  const pageNums = computePageNumbers(page, totalPages, 5);
+  pageNums.forEach(function (n) {
+    if (n === '...') {
+      pBtns.appendChild(el('span', { class: 'page-total', text: '…' }));
+    } else {
+      pBtns.appendChild(el('button', {
+        class: 'page-btn' + (n === page ? ' active' : ''),
+        type: 'button',
+        onclick: function () { onChange(n, null); },
+      }, String(n)));
+    }
+  });
+  pBtns.appendChild(el('button', {
+    class: 'page-btn',
+    type: 'button',
+    disabled: page >= totalPages ? 'disabled' : null,
+    onclick: function () { if (page < totalPages) onChange(page + 1, null); },
+  }, '下一页 ›'));
+  wrap.appendChild(pBtns);
+
+  // Right: total count
+  wrap.appendChild(el('div', { class: 'page-total', text: '共 ' + total.toLocaleString('en-US') + ' 条' }));
+
+  return wrap;
+}
+
+function computePageNumbers(current, totalPages, windowSize) {
+  if (totalPages <= windowSize + 2) {
+    const arr = [];
+    for (let i = 1; i <= totalPages; i++) arr.push(i);
+    return arr;
+  }
+  const half = Math.floor(windowSize / 2);
+  let start = Math.max(2, current - half);
+  let end = Math.min(totalPages - 1, current + half);
+  if (current - half < 2) end = Math.min(totalPages - 1, end + (2 - (current - half)));
+  if (current + half > totalPages - 1) start = Math.max(2, start - ((current + half) - (totalPages - 1)));
+  const arr = [1];
+  if (start > 2) arr.push('...');
+  for (let i = start; i <= end; i++) arr.push(i);
+  if (end < totalPages - 1) arr.push('...');
+  arr.push(totalPages);
+  return arr;
 }
 
 /* ============================================================
