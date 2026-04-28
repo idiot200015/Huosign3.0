@@ -430,6 +430,66 @@
   }
   .page-total { color: #6b7280; font-size: 13px; white-space: nowrap; }
 
+  /* ===== Page top bar (title + actions) ===== */
+  .page-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .page-top h2 {
+    font-size: 18px; font-weight: 600; color: #1f2937;
+  }
+
+  /* ===== Tabs ===== */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    background: #fff;
+    padding: 6px 12px;
+    border-radius: 8px 8px 0 0;
+    border-bottom: 1px solid #f0f1f3;
+  }
+  .tab {
+    padding: 8px 18px;
+    font-size: 14px;
+    color: #4b5563;
+    border-radius: 6px 6px 0 0;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .tab:hover { color: #3b82f6; }
+  .tab.active {
+    color: #3b82f6;
+    border-bottom-color: #3b82f6;
+    font-weight: 600;
+  }
+
+  /* ===== Status tag ===== */
+  .status-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 18px;
+  }
+  .status-verified  { background: #d1fae5; color: #047857; }
+  .status-unverified { background: #fee2e2; color: #b91c1c; }
+
+  /* ===== Modal description list ===== */
+  .modal-info {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 6px;
+    padding: 12px 14px;
+    color: #1e40af;
+    font-size: 13px;
+    line-height: 1.7;
+    margin-bottom: 12px;
+  }
+  .modal-info ul { margin: 6px 0 0 18px; }
+  .modal-tip { color: #6b7280; font-size: 13px; }
+
   /* ===== Modal ===== */
   .modal-mask {
     position: fixed; inset: 0;
@@ -507,6 +567,14 @@ const State = {
     page: 1,
     pageSize: 20,
   },
+  settlements: {
+    tab: 'pending',                // 'pending' | 'approved'
+    pendingSearch: { phone: '', name: '' },
+    approvedSearch: { phone: '', name: '', dateFrom: '', dateTo: '' },
+    page: 1,
+    pageSize: 20,
+  },
+  modal: null,                     // { type, payload }
 };
 
 /* ============================================================
@@ -797,7 +865,7 @@ function avatarColor(seed) {
  * ============================================================ */
 const Pages = {
   agents:       { label: '代理列表',  render: renderAgentsPage },
-  settlements:  { label: '结算记录',  render: renderSettlementsPagePlaceholder },
+  settlements:  { label: '结算记录',  render: renderSettlementsPage },
   bonus:        { label: '奖金流水',  render: renderBonusPagePlaceholder },
 };
 
@@ -829,16 +897,415 @@ function renderApp() {
   const main = document.getElementById('main');
   main.innerHTML = '';
   Pages[State.currentPage].render(main);
+  renderModal();
 }
 
-/* Placeholders for pages still to be implemented */
-function renderSettlementsPagePlaceholder(root) {
-  root.appendChild(el('div', { class: 'page-placeholder' },
-    '【结算记录】将在 Phase 4 实现'));
-}
+/* Placeholder for pages still to be implemented */
 function renderBonusPagePlaceholder(root) {
   root.appendChild(el('div', { class: 'page-placeholder' },
     '【奖金流水】将在 Phase 5 实现'));
+}
+
+/* ============================================================
+ * Settlements page
+ * ============================================================ */
+function renderSettlementsPage(root) {
+  // Page top bar: title + 发起结算 button
+  const top = el('div', { class: 'page-top' });
+  top.appendChild(el('h2', { text: '结算记录' }));
+  top.appendChild(el('button', {
+    class: 'btn btn-primary',
+    type: 'button',
+    onclick: function () {
+      State.modal = { type: 'initiate' };
+      renderApp();
+    },
+  }, '发起结算'));
+  root.appendChild(top);
+
+  // Tabs + list card
+  const card = el('div', { class: 'list-card' });
+  card.appendChild(renderSettlementTabs());
+
+  if (State.settlements.tab === 'pending') {
+    card.appendChild(renderPendingSearchBar());
+    const items = applyPendingFilter(Mock.settlements.pending);
+    const total = items.length;
+    const ps = State.settlements.pageSize;
+    const page = clampPage(State.settlements.page, total, ps);
+    const slice = items.slice((page - 1) * ps, (page - 1) * ps + ps);
+    card.appendChild(renderPendingTable(slice));
+    card.appendChild(renderPagination(total, page, ps, paginationSettlementsCb));
+  } else {
+    card.appendChild(renderApprovedSearchBar());
+    const items = applyApprovedFilter(Mock.settlements.approved);
+    const total = items.length;
+    const ps = State.settlements.pageSize;
+    const page = clampPage(State.settlements.page, total, ps);
+    const slice = items.slice((page - 1) * ps, (page - 1) * ps + ps);
+    card.appendChild(renderApprovedTable(slice));
+    card.appendChild(renderPagination(total, page, ps, paginationSettlementsCb));
+  }
+
+  root.appendChild(card);
+}
+
+function paginationSettlementsCb(newPage, newSize) {
+  if (newSize != null) {
+    State.settlements.pageSize = newSize;
+    State.settlements.page = 1;
+  } else {
+    State.settlements.page = newPage;
+  }
+  renderApp();
+}
+
+function clampPage(page, total, pageSize) {
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  if (page > totalPages) return totalPages;
+  if (page < 1) return 1;
+  return page;
+}
+
+function renderSettlementTabs() {
+  const tabs = el('div', { class: 'tabs' });
+  function tab(key, label) {
+    return el('button', {
+      class: 'tab' + (State.settlements.tab === key ? ' active' : ''),
+      type: 'button',
+      onclick: function () {
+        State.settlements.tab = key;
+        State.settlements.page = 1;
+        renderApp();
+      },
+    }, label);
+  }
+  tabs.appendChild(tab('pending', '待审核'));
+  tabs.appendChild(tab('approved', '已通过'));
+  return tabs;
+}
+
+function renderPendingSearchBar() {
+  const bar = el('div', { class: 'search-bar' });
+  const s = State.settlements.pendingSearch;
+  bar.appendChild(el('div', { class: 'search-field' }, [
+    el('label', { text: '手机号' }),
+    el('input', {
+      class: 'input small', type: 'text', placeholder: '请输入手机号',
+      value: s.phone,
+      oninput: function (ev) { s.phone = ev.target.value; },
+    }),
+  ]));
+  bar.appendChild(el('div', { class: 'search-field' }, [
+    el('label', { text: '昵称' }),
+    el('input', {
+      class: 'input small', type: 'text', placeholder: '请输入昵称',
+      value: s.name,
+      oninput: function (ev) { s.name = ev.target.value; },
+    }),
+  ]));
+  bar.appendChild(el('button', {
+    class: 'btn btn-primary', type: 'button',
+    onclick: function () {
+      State.settlements.page = 1;
+      renderApp();
+    },
+  }, '搜索'));
+  return bar;
+}
+
+function renderApprovedSearchBar() {
+  const bar = el('div', { class: 'search-bar' });
+  const s = State.settlements.approvedSearch;
+  bar.appendChild(el('div', { class: 'search-field' }, [
+    el('label', { text: '手机号' }),
+    el('input', {
+      class: 'input small', type: 'text', placeholder: '请输入手机号',
+      value: s.phone,
+      oninput: function (ev) { s.phone = ev.target.value; },
+    }),
+  ]));
+  bar.appendChild(el('div', { class: 'search-field' }, [
+    el('label', { text: '昵称' }),
+    el('input', {
+      class: 'input small', type: 'text', placeholder: '请输入昵称',
+      value: s.name,
+      oninput: function (ev) { s.name = ev.target.value; },
+    }),
+  ]));
+  bar.appendChild(el('div', { class: 'search-field' }, [
+    el('label', { text: '通过时间' }),
+    el('div', { class: 'date-range' }, [
+      el('input', {
+        class: 'input', type: 'date',
+        value: s.dateFrom,
+        onchange: function (ev) { s.dateFrom = ev.target.value; },
+      }),
+      el('span', { text: '-' }),
+      el('input', {
+        class: 'input', type: 'date',
+        value: s.dateTo,
+        onchange: function (ev) { s.dateTo = ev.target.value; },
+      }),
+    ]),
+  ]));
+  bar.appendChild(el('button', {
+    class: 'btn btn-primary', type: 'button',
+    onclick: function () {
+      State.settlements.page = 1;
+      renderApp();
+    },
+  }, '搜索'));
+  return bar;
+}
+
+function applyPendingFilter(list) {
+  const s = State.settlements.pendingSearch;
+  return list.filter(function (row) {
+    const p = Mock.people[row.agentId];
+    if (!p) return false;
+    if (s.phone && !p.phone.includes(s.phone)) return false;
+    if (s.name && !p.name.includes(s.name)) return false;
+    return true;
+  });
+}
+
+function applyApprovedFilter(list) {
+  const s = State.settlements.approvedSearch;
+  return list.filter(function (row) {
+    const p = Mock.people[row.agentId];
+    if (!p) return false;
+    if (s.phone && !p.phone.includes(s.phone)) return false;
+    if (s.name && !p.name.includes(s.name)) return false;
+    if (s.dateFrom) {
+      if (row.approvedAt.getTime() < new Date(s.dateFrom).getTime()) return false;
+    }
+    if (s.dateTo) {
+      const end = new Date(s.dateTo); end.setHours(23, 59, 59, 999);
+      if (row.approvedAt.getTime() > end.getTime()) return false;
+    }
+    return true;
+  });
+}
+
+function renderPendingTable(items) {
+  const table = el('table', { class: 'data-table' });
+  const thead = el('thead');
+  const tr = el('tr');
+  ['序号','昵称','手机号','真实姓名','实名认证','结算金额','收款账户名','收款账户号','操作']
+    .forEach(function (h) { tr.appendChild(el('th', { text: h })); });
+  thead.appendChild(tr);
+  table.appendChild(thead);
+
+  const tbody = el('tbody');
+  if (!items.length) {
+    const r = el('tr');
+    r.appendChild(el('td', { colspan: '9' }, [el('div', { class: 'empty', text: '暂无数据' })]));
+    tbody.appendChild(r);
+  } else {
+    items.forEach(function (row) {
+      const p = Mock.people[row.agentId];
+      const r = el('tr');
+      r.appendChild(el('td', { text: String(row.serial) }));
+      r.appendChild(el('td', [
+        el('div', { class: 'user-cell' }, [
+          el('div', { class: 'avatar', style: 'background:' + avatarColor(p.id), text: p.avatar }),
+          el('span', { class: 'nickname', text: p.name }),
+        ]),
+      ]));
+      r.appendChild(el('td', { text: p.phone }));
+      r.appendChild(el('td', { text: p.realName || '-' }));
+      r.appendChild(el('td', [
+        el('span', {
+          class: 'status-tag ' + (p.verified ? 'status-verified' : 'status-unverified'),
+          text: p.verified ? '已认证' : '未认证',
+        }),
+      ]));
+      r.appendChild(el('td', { text: fmtMoney(row.amount) }));
+      r.appendChild(el('td', { text: p.alipayName || '-' }));
+      r.appendChild(el('td', { text: p.alipayAccount || '-' }));
+      r.appendChild(el('td', [
+        el('button', {
+          class: 'btn btn-primary', type: 'button',
+          onclick: function () {
+            State.modal = { type: 'approve', payload: { serial: row.serial, agentId: row.agentId, amount: row.amount } };
+            renderApp();
+          },
+        }, '确认通过'),
+      ]));
+      tbody.appendChild(r);
+    });
+  }
+  table.appendChild(tbody);
+  return table;
+}
+
+function renderApprovedTable(items) {
+  const table = el('table', { class: 'data-table' });
+  const thead = el('thead');
+  const tr = el('tr');
+  ['序号','昵称','手机号','真实姓名','实名认证','结算金额','收款账户名','收款账户号','通过时间']
+    .forEach(function (h) { tr.appendChild(el('th', { text: h })); });
+  thead.appendChild(tr);
+  table.appendChild(thead);
+
+  const tbody = el('tbody');
+  if (!items.length) {
+    const r = el('tr');
+    r.appendChild(el('td', { colspan: '9' }, [el('div', { class: 'empty', text: '暂无数据' })]));
+    tbody.appendChild(r);
+  } else {
+    items.forEach(function (row) {
+      const p = Mock.people[row.agentId];
+      const r = el('tr');
+      r.appendChild(el('td', { text: String(row.serial) }));
+      r.appendChild(el('td', [
+        el('div', { class: 'user-cell' }, [
+          el('div', { class: 'avatar', style: 'background:' + avatarColor(p.id), text: p.avatar }),
+          el('span', { class: 'nickname', text: p.name }),
+        ]),
+      ]));
+      r.appendChild(el('td', { text: p.phone }));
+      r.appendChild(el('td', { text: p.realName || '-' }));
+      r.appendChild(el('td', [
+        el('span', {
+          class: 'status-tag ' + (p.verified ? 'status-verified' : 'status-unverified'),
+          text: p.verified ? '已认证' : '未认证',
+        }),
+      ]));
+      r.appendChild(el('td', { text: fmtMoney(row.amount) }));
+      r.appendChild(el('td', { text: p.alipayName || '-' }));
+      r.appendChild(el('td', { text: p.alipayAccount || '-' }));
+      r.appendChild(el('td', { text: fmtDateTime(row.approvedAt) }));
+      tbody.appendChild(r);
+    });
+  }
+  table.appendChild(tbody);
+  return table;
+}
+
+/* ============================================================
+ * Modal rendering
+ * ============================================================ */
+function renderModal() {
+  const root = document.getElementById('modal-root');
+  root.innerHTML = '';
+  if (!State.modal) return;
+
+  if (State.modal.type === 'initiate') {
+    root.appendChild(buildInitiateModal());
+  } else if (State.modal.type === 'approve') {
+    root.appendChild(buildApproveModal(State.modal.payload));
+  } else if (State.modal.type === 'toast') {
+    root.appendChild(buildToastModal(State.modal.payload));
+  }
+}
+
+function closeModal() {
+  State.modal = null;
+  renderApp();
+}
+
+function buildInitiateModal() {
+  const mask = el('div', { class: 'modal-mask' });
+  const modal = el('div', { class: 'modal' });
+
+  modal.appendChild(el('div', { class: 'modal-header' }, [
+    el('span', { text: '发起结算' }),
+    el('button', { class: 'modal-close', type: 'button', text: '×',
+      onclick: closeModal,
+    }),
+  ]));
+
+  const body = el('div', { class: 'modal-body' });
+  const info = el('div', { class: 'modal-info' });
+  info.appendChild(document.createTextNode('系统将扫描所有代理生成结算单：'));
+  info.appendChild(el('ul', null, [
+    el('li', { text: '首次结算的代理：无金额限制，全部进入' }),
+    el('li', { text: '非首次结算：余额 ≥ ¥200 的代理才进入' }),
+  ]));
+  body.appendChild(info);
+  body.appendChild(el('div', { class: 'modal-tip',
+    text: '门槛金额由系统预设，如需调整请联系开发配置。' }));
+  modal.appendChild(body);
+
+  modal.appendChild(el('div', { class: 'modal-footer' }, [
+    el('button', { class: 'btn', type: 'button', text: '取消',
+      onclick: closeModal,
+    }),
+    el('button', { class: 'btn btn-primary', type: 'button', text: '确认发起',
+      onclick: function () {
+        State.modal = { type: 'toast', payload: '已发起结算，扫描完成（mock）。' };
+        renderApp();
+      },
+    }),
+  ]));
+
+  mask.appendChild(modal);
+  return mask;
+}
+
+function buildApproveModal(payload) {
+  const mask = el('div', { class: 'modal-mask' });
+  const modal = el('div', { class: 'modal' });
+  const p = Mock.people[payload.agentId];
+
+  modal.appendChild(el('div', { class: 'modal-header' }, [
+    el('span', { text: '确认通过' }),
+    el('button', { class: 'modal-close', type: 'button', text: '×',
+      onclick: closeModal,
+    }),
+  ]));
+
+  const body = el('div', { class: 'modal-body' });
+  body.appendChild(el('div', null, '确认通过该代理的结算？'));
+  body.appendChild(el('div', { style: 'margin-top:10px;color:#374151;line-height:1.8;' }, [
+    el('div', null, '代理昵称：' + (p ? p.name : '-')),
+    el('div', null, '手机号：' + (p ? p.phone : '-')),
+    el('div', null, '结算金额：' + fmtMoney(payload.amount)),
+  ]));
+  modal.appendChild(body);
+
+  modal.appendChild(el('div', { class: 'modal-footer' }, [
+    el('button', { class: 'btn', type: 'button', text: '取消', onclick: closeModal }),
+    el('button', { class: 'btn btn-primary', type: 'button', text: '确认通过',
+      onclick: function () {
+        // Move from pending to approved
+        const idx = Mock.settlements.pending.findIndex(x => x.serial === payload.serial && x.agentId === payload.agentId);
+        if (idx >= 0) {
+          const row = Mock.settlements.pending[idx];
+          Mock.settlements.pending.splice(idx, 1);
+          const newSerial = Mock.settlements.approved.length + 1;
+          Mock.settlements.approved.push({
+            serial: newSerial,
+            agentId: row.agentId,
+            amount: row.amount,
+            approvedAt: new Date(),
+          });
+        }
+        State.modal = { type: 'toast', payload: '已确认通过。' };
+        renderApp();
+      },
+    }),
+  ]));
+
+  mask.appendChild(modal);
+  return mask;
+}
+
+function buildToastModal(text) {
+  const mask = el('div', { class: 'modal-mask' });
+  const modal = el('div', { class: 'modal' });
+  modal.appendChild(el('div', { class: 'modal-header' }, [
+    el('span', { text: '提示' }),
+    el('button', { class: 'modal-close', type: 'button', text: '×', onclick: closeModal }),
+  ]));
+  modal.appendChild(el('div', { class: 'modal-body', text: text }));
+  modal.appendChild(el('div', { class: 'modal-footer' }, [
+    el('button', { class: 'btn btn-primary', type: 'button', text: '知道了', onclick: closeModal }),
+  ]));
+  mask.appendChild(modal);
+  return mask;
 }
 
 /* ============================================================
