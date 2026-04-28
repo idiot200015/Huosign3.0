@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>邀请管理系统 - OA 后台</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+    font-size: 14px;
+    color: #1f2937;
+    background: #f5f7fa;
+  }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; }
+  input { font-family: inherit; outline: none; }
+  table { border-collapse: collapse; width: 100%; }
+
+  /* ===== Layout ===== */
+  .app {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    grid-template-rows: 56px 1fr;
+    grid-template-areas:
+      "sidebar header"
+      "sidebar main";
+    height: 100vh;
+  }
+  .sidebar {
+    grid-area: sidebar;
+    background: #1f2a44;
+    color: #cbd5e1;
+    padding: 20px 0;
+    overflow-y: auto;
+  }
+  .sidebar-title {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 0 20px 18px;
+    border-bottom: 1px solid #2d3a5a;
+    margin-bottom: 12px;
+  }
+  .nav-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 20px;
+    color: #cbd5e1;
+    font-size: 14px;
+    border-left: 3px solid transparent;
+    transition: background 0.15s, color 0.15s;
+  }
+  .nav-item:hover { background: #2a3656; color: #fff; }
+  .nav-item.active {
+    background: #2a3656;
+    color: #fff;
+    border-left-color: #3b82f6;
+  }
+
+  .header {
+    grid-area: header;
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+  }
+  .header-title { font-size: 16px; font-weight: 600; color: #1f2937; }
+  .header-user {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .header-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600;
+  }
+
+  .main {
+    grid-area: main;
+    overflow-y: auto;
+    padding: 20px 24px;
+  }
+
+  /* ===== Common Card ===== */
+  .card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+
+  /* ===== Buttons ===== */
+  .btn {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    color: #374151;
+    transition: all 0.15s;
+  }
+  .btn:hover { border-color: #3b82f6; color: #3b82f6; }
+  .btn-primary {
+    background: #3b82f6;
+    color: #fff;
+    border-color: #3b82f6;
+  }
+  .btn-primary:hover { background: #2563eb; border-color: #2563eb; color: #fff; }
+  .btn-ghost {
+    background: transparent; border-color: #d1d5db; color: #4b5563;
+  }
+  .btn-ghost.active {
+    background: #eff6ff; border-color: #3b82f6; color: #3b82f6;
+  }
+
+  /* ===== Inputs ===== */
+  .input {
+    height: 32px;
+    padding: 0 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #1f2937;
+    background: #fff;
+  }
+  .input:focus { border-color: #3b82f6; }
+
+  /* ===== Empty state ===== */
+  .empty {
+    padding: 60px 0;
+    text-align: center;
+    color: #9ca3af;
+    font-size: 14px;
+  }
+
+  /* ===== Page placeholder (will be filled in next phases) ===== */
+  .page-placeholder {
+    padding: 40px;
+    color: #6b7280;
+    font-size: 14px;
+    text-align: center;
+  }
+
+  /* ===== Modal ===== */
+  .modal-mask {
+    position: fixed; inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000;
+  }
+  .modal {
+    background: #fff;
+    border-radius: 8px;
+    min-width: 460px;
+    max-width: 560px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    overflow: hidden;
+  }
+  .modal-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex; align-items: center; justify-content: space-between;
+    font-weight: 600; font-size: 15px;
+  }
+  .modal-close {
+    color: #9ca3af; font-size: 18px; line-height: 1;
+  }
+  .modal-close:hover { color: #4b5563; }
+  .modal-body { padding: 20px; font-size: 14px; color: #374151; line-height: 1.7; }
+  .modal-footer {
+    padding: 12px 20px;
+    border-top: 1px solid #e5e7eb;
+    display: flex; justify-content: flex-end; gap: 10px;
+  }
+</style>
+</head>
+<body>
+
+<div id="app" class="app">
+  <aside class="sidebar">
+    <div class="sidebar-title">邀请管理系统</div>
+    <nav id="nav"></nav>
+  </aside>
+
+  <header class="header">
+    <div id="header-title" class="header-title">代理列表</div>
+    <div class="header-user">
+      <span style="color:#6b7280;">运营管理员</span>
+      <div class="header-avatar">OA</div>
+    </div>
+  </header>
+
+  <main id="main" class="main">
+    <div class="page-placeholder">页面加载中…</div>
+  </main>
+</div>
+
+<div id="modal-root"></div>
+
+<script>
+'use strict';
+
+/* ============================================================
+ * State
+ * ============================================================ */
+const State = {
+  currentPage: 'agents',           // 'agents' | 'settlements' | 'bonus'
+  breadcrumb: [],                  // [{id, name}] - excluding the root "代理列表"
+  // (additional state added in later phases)
+};
+
+/* ============================================================
+ * Mock Data (skeleton; expanded in later phases)
+ * ============================================================ */
+const Mock = {
+  // Tree of people. Agents have isAgent=true, regular users have isAgent=false.
+  // Each node has: id, name, phone, avatar, level, becomeAgentTime, totalPaid,
+  // totalReward, balance, parentId, childrenIds.
+  people: {},
+  // settlements: pending and approved
+  settlements: { pending: [], approved: [] },
+  // bonusByOrder: orderId -> [{time, userId, amount}]
+  bonusByOrder: {},
+};
+
+/* ============================================================
+ * Utilities
+ * ============================================================ */
+function el(tag, attrs, children) {
+  const node = document.createElement(tag);
+  if (attrs) {
+    for (const k in attrs) {
+      if (k === 'class') node.className = attrs[k];
+      else if (k === 'style') node.setAttribute('style', attrs[k]);
+      else if (k === 'text') node.textContent = attrs[k];
+      else if (k === 'html') node.innerHTML = attrs[k];
+      else if (k.startsWith('on') && typeof attrs[k] === 'function') {
+        node.addEventListener(k.substring(2).toLowerCase(), attrs[k]);
+      } else if (attrs[k] !== undefined && attrs[k] !== null) {
+        node.setAttribute(k, attrs[k]);
+      }
+    }
+  }
+  if (children) {
+    if (!Array.isArray(children)) children = [children];
+    for (const c of children) {
+      if (c == null) continue;
+      if (typeof c === 'string' || typeof c === 'number') {
+        node.appendChild(document.createTextNode(String(c)));
+      } else {
+        node.appendChild(c);
+      }
+    }
+  }
+  return node;
+}
+
+function fmtMoney(n) {
+  if (n == null || n === '-') return '-';
+  const sign = n < 0 ? '-' : '';
+  const abs = Math.abs(n);
+  return sign + '¥' + abs.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function fmtNumber(n) {
+  if (n == null || n === '-') return '-';
+  return n.toLocaleString('en-US');
+}
+
+function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+
+function fmtDateTime(d) {
+  if (!d) return '-';
+  const dt = (d instanceof Date) ? d : new Date(d);
+  return dt.getFullYear() + '-' + pad2(dt.getMonth() + 1) + '-' + pad2(dt.getDate())
+    + ' ' + pad2(dt.getHours()) + ':' + pad2(dt.getMinutes()) + ':' + pad2(dt.getSeconds());
+}
+
+function fmtDate(d) {
+  if (!d) return '-';
+  const dt = (d instanceof Date) ? d : new Date(d);
+  return dt.getFullYear() + '-' + pad2(dt.getMonth() + 1) + '-' + pad2(dt.getDate());
+}
+
+function avatarColor(seed) {
+  const colors = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#6366f1'];
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  return colors[h % colors.length];
+}
+
+/* ============================================================
+ * Mock data generation
+ * ============================================================ */
+(function buildMockData() {
+  const surnames = ['张','李','王','赵','陈','刘','杨','黄','周','吴','徐','孙','胡','朱','高','林','何','郭','马','罗'];
+  const givens = ['小明','晓峰','子轩','梓涵','雨萱','浩然','一鸣','嘉怡','思远','若曦','睿杰','欣怡','博文','子墨','雅婷','志强','晨曦','梓豪','慧敏','二'];
+  let pid = 1;
+  function makeId() { return 'P' + (pid++).toString().padStart(4, '0'); }
+  function randPhone() {
+    let s = '1' + (Math.floor(Math.random() * 9) + 1);
+    for (let i = 0; i < 9; i++) s += Math.floor(Math.random() * 10);
+    return s;
+  }
+  function randDate(daysAgoMax) {
+    const now = Date.now();
+    const offset = Math.floor(Math.random() * daysAgoMax * 24 * 3600 * 1000);
+    return new Date(now - offset);
+  }
+
+  // Random unique name generator
+  const usedNames = new Set();
+  function uniqueName() {
+    let tries = 0;
+    while (tries < 50) {
+      const n = surnames[Math.floor(Math.random() * surnames.length)] + givens[Math.floor(Math.random() * givens.length)];
+      if (!usedNames.has(n)) { usedNames.add(n); return n; }
+      tries++;
+    }
+    return '用户' + pid;
+  }
+
+  function makePerson(opts) {
+    const isAgent = opts.isAgent;
+    const id = makeId();
+    const name = opts.name || uniqueName();
+    const totalPaid = isAgent
+      ? Math.round((Math.random() * 6000 + 200) * 100) / 100
+      : Math.round((Math.random() * 2000) * 100) / 100;
+    const person = {
+      id,
+      name,
+      phone: randPhone(),
+      avatar: name.charAt(0),
+      isAgent,
+      level: opts.level || 0,             // agent level (1,2,3...) or 0 for regular user
+      parentId: opts.parentId || null,
+      childrenIds: [],
+      totalPaid,
+      totalReward: isAgent ? Math.round((Math.random() * 4000) * 100) / 100 : 0,
+      balance: 0,
+      becomeAgentTime: isAgent ? randDate(opts.daysAgoMax || 180) : null,
+      // settlement related
+      realName: opts.realName || (name.length === 2 ? name : name),
+      verified: isAgent ? (Math.random() > 0.3) : false,
+      alipayName: '',
+      alipayAccount: '',
+    };
+    person.balance = isAgent ? Math.round((person.totalReward * (Math.random() * 0.6 + 0.2)) * 100) / 100 : 0;
+    if (isAgent && person.verified) {
+      person.alipayName = person.realName;
+      person.alipayAccount = (Math.random() > 0.5)
+        ? person.phone
+        : (person.name + '@example.com');
+    }
+    Mock.people[id] = person;
+    return person;
+  }
+
+  // Build a tree.  Top-level agents (level 1) — 8 people.
+  const topAgents = [];
+  for (let i = 0; i < 8; i++) {
+    topAgents.push(makePerson({ isAgent: true, level: 1, daysAgoMax: 180 }));
+  }
+  // Force first three top-level agents to specific names so screenshots match the spec example
+  topAgents[0].name = '张小明'; topAgents[0].avatar = '张';
+  topAgents[1].name = '周杰';   topAgents[1].avatar = '周';
+  topAgents[2].name = '李晓峰'; topAgents[2].avatar = '李';
+
+  function addChildren(parent, agentCount, userCount, childLevel) {
+    for (let i = 0; i < agentCount; i++) {
+      const c = makePerson({
+        isAgent: true,
+        level: childLevel,
+        parentId: parent.id,
+        daysAgoMax: 120,
+      });
+      parent.childrenIds.push(c.id);
+    }
+    for (let i = 0; i < userCount; i++) {
+      const c = makePerson({
+        isAgent: false,
+        level: 0,
+        parentId: parent.id,
+      });
+      parent.childrenIds.push(c.id);
+    }
+  }
+
+  // Special: first top agent gets a richer subtree
+  const a1 = topAgents[0];                               // 张小明 (level 1)
+  addChildren(a1, 4, 3, 2);                              // 4 agents + 3 users
+  // Force one of a1's child agents to be "周杰" so 张小明 > 周杰 path works
+  const a1FirstChild = Mock.people[a1.childrenIds[0]];
+  a1FirstChild.name = '周杰'; a1FirstChild.avatar = '周';
+  addChildren(a1FirstChild, 3, 2, 3);                    // level 3 children
+  const a1GrandChild = Mock.people[a1FirstChild.childrenIds[0]];
+  a1GrandChild.name = '李晓峰'; a1GrandChild.avatar = '李';
+  addChildren(a1GrandChild, 2, 2, 4);
+  const a1GreatGrand = Mock.people[a1GrandChild.childrenIds[0]];
+  a1GreatGrand.name = '王二'; a1GreatGrand.avatar = '王';
+  addChildren(a1GreatGrand, 1, 3, 5);
+
+  // Other top agents
+  for (let i = 1; i < topAgents.length; i++) {
+    const cAgentCount = 2 + Math.floor(Math.random() * 4);
+    const cUserCount = 1 + Math.floor(Math.random() * 4);
+    addChildren(topAgents[i], cAgentCount, cUserCount, 2);
+    // Give some grandchildren too
+    for (const cid of topAgents[i].childrenIds) {
+      const c = Mock.people[cid];
+      if (c.isAgent && Math.random() > 0.4) {
+        addChildren(c, Math.floor(Math.random() * 3), Math.floor(Math.random() * 3), 3);
+      }
+    }
+  }
+
+  // Compute team totals (number of all descendants)
+  function computeTeamTotal(p) {
+    let cnt = 0;
+    for (const cid of p.childrenIds) {
+      cnt += 1 + computeTeamTotal(Mock.people[cid]);
+    }
+    p.teamTotal = cnt;
+    return cnt;
+  }
+  for (const id in Mock.people) {
+    const p = Mock.people[id];
+    if (!p.parentId) computeTeamTotal(p);
+  }
+  // After full pass, everyone has teamTotal set (recursive call sets all)
+  for (const id in Mock.people) {
+    const p = Mock.people[id];
+    if (p.teamTotal == null) p.teamTotal = 0;
+    p.directInvites = p.childrenIds.length;
+  }
+
+  // Build settlements: pick agents with balance >= 200 OR a few "first-time"
+  const allAgents = Object.values(Mock.people).filter(x => x.isAgent);
+  // pending list
+  const pendingPicks = [];
+  // first-timers: even with low balance, include some
+  const firstTimers = allAgents.filter(a => a.balance < 200).slice(0, 4);
+  const eligible = allAgents.filter(a => a.balance >= 200);
+  pendingPicks.push(...firstTimers, ...eligible);
+  // dedupe
+  const seen = new Set();
+  let serial = 1;
+  for (const a of pendingPicks) {
+    if (seen.has(a.id)) continue;
+    seen.add(a.id);
+    Mock.settlements.pending.push({
+      serial: serial++,
+      agentId: a.id,
+      amount: a.balance > 0 ? a.balance : Math.round((Math.random() * 150 + 20) * 100) / 100,
+    });
+  }
+  // approved list (mock a few historical ones)
+  for (let i = 0; i < 6; i++) {
+    const a = allAgents[Math.floor(Math.random() * allAgents.length)];
+    Mock.settlements.approved.push({
+      serial: i + 1,
+      agentId: a.id,
+      amount: Math.round((Math.random() * 1500 + 200) * 100) / 100,
+      approvedAt: randDate(60),
+    });
+  }
+
+  // Build bonus records keyed by orderId.
+  // For each order: a regular user pays, and the chain of agents above gets reward.
+  const orderIds = ['ORD20260115001', 'ORD20260301002', 'ORD20260328003', 'ORD20260420004'];
+  for (const orderId of orderIds) {
+    const users = Object.values(Mock.people).filter(p => !p.isAgent && p.parentId);
+    if (!users.length) continue;
+    const buyer = users[Math.floor(Math.random() * users.length)];
+    const records = [];
+    let cur = Mock.people[buyer.parentId];
+    let levelUp = 0;
+    while (cur) {
+      const amount = levelUp === 0
+        ? Math.round((Math.random() * 80 + 30) * 100) / 100
+        : Math.round((Math.random() * 30 + 5) * 100) / 100;
+      records.push({
+        time: randDate(30),
+        userId: cur.id,
+        amount,
+      });
+      levelUp++;
+      cur = cur.parentId ? Mock.people[cur.parentId] : null;
+    }
+    Mock.bonusByOrder[orderId] = records;
+  }
+})();
+
+/* ============================================================
+ * Router / Page rendering (skeleton — pages filled in next phases)
+ * ============================================================ */
+const Pages = {
+  agents:       { label: '代理列表',  render: renderAgentsPagePlaceholder },
+  settlements:  { label: '结算记录',  render: renderSettlementsPagePlaceholder },
+  bonus:        { label: '奖金流水',  render: renderBonusPagePlaceholder },
+};
+
+function renderNav() {
+  const nav = document.getElementById('nav');
+  nav.innerHTML = '';
+  Object.keys(Pages).forEach(function (key) {
+    const item = el('button', {
+      class: 'nav-item' + (State.currentPage === key ? ' active' : ''),
+      type: 'button',
+      onclick: function () { goTo(key); },
+    }, Pages[key].label);
+    nav.appendChild(item);
+  });
+}
+
+function goTo(page) {
+  State.currentPage = page;
+  if (page === 'agents') {
+    // breadcrumb resets only when explicitly going via nav
+    State.breadcrumb = [];
+  }
+  renderApp();
+}
+
+function renderApp() {
+  renderNav();
+  document.getElementById('header-title').textContent = Pages[State.currentPage].label;
+  const main = document.getElementById('main');
+  main.innerHTML = '';
+  Pages[State.currentPage].render(main);
+}
+
+/* Phase 1 placeholder renderers (replaced in later phases) */
+function renderAgentsPagePlaceholder(root) {
+  root.appendChild(el('div', { class: 'page-placeholder' },
+    '【代理列表】将在 Phase 2 实现'));
+}
+function renderSettlementsPagePlaceholder(root) {
+  root.appendChild(el('div', { class: 'page-placeholder' },
+    '【结算记录】将在 Phase 4 实现'));
+}
+function renderBonusPagePlaceholder(root) {
+  root.appendChild(el('div', { class: 'page-placeholder' },
+    '【奖金流水】将在 Phase 5 实现'));
+}
+
+/* ============================================================
+ * Bootstrap
+ * ============================================================ */
+document.addEventListener('DOMContentLoaded', function () {
+  renderApp();
+});
+</script>
+
+</body>
+</html>
