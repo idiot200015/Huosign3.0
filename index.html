@@ -476,6 +476,131 @@
   .status-verified  { background: #d1fae5; color: #047857; }
   .status-unverified { background: #fee2e2; color: #b91c1c; }
 
+  /* ===== Login page ===== */
+  .login-shell {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #eff6ff 0%, #f5f7fa 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .login-card {
+    width: 380px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 36px 32px 28px;
+    box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
+  }
+  .login-logo {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .login-logo .logo-mark {
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+  .login-logo .logo-text {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+  }
+  .login-field {
+    margin-bottom: 14px;
+  }
+  .login-field label {
+    display: block;
+    font-size: 13px;
+    color: #4b5563;
+    margin-bottom: 6px;
+  }
+  .login-field input {
+    width: 100%;
+    height: 38px;
+    padding: 0 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #1f2937;
+    background: #fff;
+    outline: none;
+    box-sizing: border-box;
+  }
+  .login-field input:focus { border-color: #3b82f6; }
+  .login-error {
+    color: #b91c1c;
+    font-size: 13px;
+    margin: 4px 0 12px;
+    min-height: 18px;
+  }
+  .login-submit {
+    width: 100%;
+    height: 40px;
+    background: #3b82f6;
+    color: #fff;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .login-submit:hover { background: #2563eb; }
+  .login-tip {
+    margin-top: 16px;
+    text-align: center;
+    color: #9ca3af;
+    font-size: 12px;
+  }
+
+  /* ===== User dropdown (header) ===== */
+  .user-trigger {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.15s;
+  }
+  .user-trigger:hover { background: #f3f4f6; }
+  .user-menu-wrap {
+    position: relative;
+  }
+  .user-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
+    min-width: 140px;
+    overflow: hidden;
+    z-index: 80;
+  }
+  .user-menu button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 10px 14px;
+    background: transparent;
+    color: #1f2937;
+    font-size: 13px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .user-menu button:hover { background: #f3f4f6; color: #3b82f6; }
+
   /* ===== Modal description list ===== */
   .modal-info {
     background: #eff6ff;
@@ -525,7 +650,9 @@
 </head>
 <body>
 
-<div id="app" class="app">
+<div id="login-root"></div>
+
+<div id="app" class="app" style="display:none;">
   <aside class="sidebar">
     <div class="sidebar-title">邀请管理系统</div>
     <nav id="nav"></nav>
@@ -533,10 +660,7 @@
 
   <header class="header">
     <div id="header-title" class="header-title">代理列表</div>
-    <div class="header-user">
-      <span style="color:#6b7280;">运营管理员</span>
-      <div class="header-avatar">OA</div>
-    </div>
+    <div id="header-user-area" class="header-user"></div>
   </header>
 
   <main id="main" class="main">
@@ -553,6 +677,9 @@
  * State
  * ============================================================ */
 const State = {
+  isLoggedIn: false,               // initialized from localStorage at boot
+  loginForm: { account: '', password: '', error: '' },
+  userMenuOpen: false,
   currentPage: 'agents',           // 'agents' | 'settlements' | 'bonus'
   breadcrumb: [],                  // [{id, name}] - excluding the root "代理列表"
   agents: {
@@ -900,12 +1027,156 @@ function goTo(page) {
 }
 
 function renderApp() {
+  const loginRoot = document.getElementById('login-root');
+  const appRoot = document.getElementById('app');
+  if (!State.isLoggedIn) {
+    loginRoot.style.display = '';
+    appRoot.style.display = 'none';
+    renderLoginPage();
+    renderModal();
+    return;
+  }
+  loginRoot.style.display = 'none';
+  loginRoot.innerHTML = '';
+  appRoot.style.display = '';
   renderNav();
+  renderUserArea();
   document.getElementById('header-title').textContent = Pages[State.currentPage].label;
   const main = document.getElementById('main');
   main.innerHTML = '';
   Pages[State.currentPage].render(main);
   renderModal();
+}
+
+/* ============================================================
+ * Login page
+ * ============================================================ */
+function renderLoginPage() {
+  const root = document.getElementById('login-root');
+  root.innerHTML = '';
+
+  const shell = el('div', { class: 'login-shell' });
+  const card = el('div', { class: 'login-card' });
+
+  // Logo
+  card.appendChild(el('div', { class: 'login-logo' }, [
+    el('div', { class: 'logo-mark', text: 'OA' }),
+    el('div', { class: 'logo-text', text: '邀请管理系统' }),
+  ]));
+
+  function submit() {
+    const a = State.loginForm.account.trim();
+    const p = State.loginForm.password;
+    if (a === 'admin' && p === '123456') {
+      State.isLoggedIn = true;
+      State.loginForm = { account: '', password: '', error: '' };
+      try { localStorage.setItem('isLoggedIn', '1'); } catch (e) { /* ignore */ }
+      // Reset to default landing page
+      State.currentPage = 'agents';
+      State.breadcrumb = [];
+      renderApp();
+    } else {
+      State.loginForm.error = '账号或密码错误';
+      renderApp();
+    }
+  }
+
+  // Account field
+  const accountField = el('div', { class: 'login-field' });
+  accountField.appendChild(el('label', { text: '账号' }));
+  accountField.appendChild(el('input', {
+    type: 'text', placeholder: '请输入账号',
+    value: State.loginForm.account,
+    oninput: function (ev) { State.loginForm.account = ev.target.value; },
+    onkeydown: function (ev) { if (ev.key === 'Enter') submit(); },
+  }));
+  card.appendChild(accountField);
+
+  // Password field
+  const pwdField = el('div', { class: 'login-field' });
+  pwdField.appendChild(el('label', { text: '密码' }));
+  pwdField.appendChild(el('input', {
+    type: 'password', placeholder: '请输入密码',
+    value: State.loginForm.password,
+    oninput: function (ev) { State.loginForm.password = ev.target.value; },
+    onkeydown: function (ev) { if (ev.key === 'Enter') submit(); },
+  }));
+  card.appendChild(pwdField);
+
+  // Error message
+  card.appendChild(el('div', { class: 'login-error', text: State.loginForm.error || '' }));
+
+  // Submit button
+  card.appendChild(el('button', {
+    class: 'login-submit', type: 'button',
+    onclick: submit,
+  }, '登录'));
+
+  // Tip
+  card.appendChild(el('div', { class: 'login-tip', text: '测试账号：admin / 123456' }));
+
+  shell.appendChild(card);
+  root.appendChild(shell);
+
+  // Auto focus the empty field
+  setTimeout(function () {
+    const inputs = card.querySelectorAll('input');
+    if (!State.loginForm.account && inputs[0]) inputs[0].focus();
+    else if (!State.loginForm.password && inputs[1]) inputs[1].focus();
+  }, 0);
+}
+
+/* ============================================================
+ * Header user area + dropdown
+ * ============================================================ */
+function renderUserArea() {
+  const area = document.getElementById('header-user-area');
+  area.innerHTML = '';
+  const wrap = el('div', { class: 'user-menu-wrap' });
+
+  const trigger = el('div', {
+    class: 'user-trigger',
+    onclick: function (ev) {
+      ev.stopPropagation();
+      State.userMenuOpen = !State.userMenuOpen;
+      renderApp();
+    },
+  }, [
+    el('span', { style: 'color:#6b7280;', text: 'admin' }),
+    el('div', { class: 'header-avatar', text: 'OA' }),
+  ]);
+  wrap.appendChild(trigger);
+
+  if (State.userMenuOpen) {
+    const menu = el('div', {
+      class: 'user-menu',
+      onclick: function (ev) { ev.stopPropagation(); },
+    });
+    menu.appendChild(el('button', {
+      type: 'button',
+      onclick: function () {
+        try { localStorage.removeItem('isLoggedIn'); } catch (e) { /* ignore */ }
+        State.isLoggedIn = false;
+        State.userMenuOpen = false;
+        // Reset transient UI state
+        State.modal = null;
+        State.breadcrumb = [];
+        State.agents.showDatePopover = false;
+        renderApp();
+      },
+    }, '退出登录'));
+    wrap.appendChild(menu);
+  }
+
+  area.appendChild(wrap);
+}
+
+/* Outside click closes the user menu */
+function handleDocumentClick() {
+  if (State.userMenuOpen) {
+    State.userMenuOpen = false;
+    renderApp();
+  }
 }
 
 /* ============================================================
@@ -2057,6 +2328,12 @@ function computePageNumbers(current, totalPages, windowSize) {
  * Bootstrap
  * ============================================================ */
 document.addEventListener('DOMContentLoaded', function () {
+  try {
+    State.isLoggedIn = (localStorage.getItem('isLoggedIn') === '1');
+  } catch (e) {
+    State.isLoggedIn = false;
+  }
+  document.addEventListener('click', handleDocumentClick);
   renderApp();
 });
 </script>
