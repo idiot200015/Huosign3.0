@@ -259,11 +259,67 @@
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 8px 6px;
   }
   .list-title {
     font-weight: 600; font-size: 15px; color: #1f2937;
   }
+
+  /* ===== Breadcrumb ===== */
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 4px;
+    width: 100%;
+  }
+  .crumb-root {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1f2937;
+    padding: 4px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .crumb-root:hover { color: #3b82f6; background: #f3f4f6; }
+  .crumb-sep {
+    color: #9ca3af;
+    font-size: 14px;
+    user-select: none;
+  }
+  .crumb-item {
+    font-size: 14px;
+    color: #4b5563;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s;
+  }
+  .crumb-item:hover { color: #3b82f6; background: #f3f4f6; }
+  .crumb-item.last {
+    background: #eff6ff;
+    color: #1d4ed8;
+    cursor: default;
+    padding-right: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .crumb-item.last:hover { background: #eff6ff; color: #1d4ed8; }
+  .crumb-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    color: #6b7280;
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .crumb-close:hover { background: #dbeafe; color: #1d4ed8; }
   .data-table {
     width: 100%;
     font-size: 13px;
@@ -917,16 +973,15 @@ function applyAgentSort(list) {
 }
 
 function renderAgentsPage(root) {
-  // 1. Time filter row
-  root.appendChild(renderTimeFilterRow());
+  const isTeamDetail = State.breadcrumb.length > 0;
 
-  // 2. Metric cards
-  root.appendChild(renderMetricCards());
-
-  // 3. Search bar
+  // 团队详情页（面包屑非空）只展示：搜索栏 + 列表 + 分页。
+  // 首页代理列表（面包屑为空）展示：时间筛选 + 指标卡片 + 搜索栏 + 列表 + 分页。
+  if (!isTeamDetail) {
+    root.appendChild(renderTimeFilterRow());
+    root.appendChild(renderMetricCards());
+  }
   root.appendChild(renderAgentSearchBar());
-
-  // 4. List card with breadcrumb header + table + pagination
   root.appendChild(renderAgentListCard());
 }
 
@@ -1131,9 +1186,9 @@ function renderAgentSearchBar() {
 function renderAgentListCard() {
   const card = el('div', { class: 'list-card' });
 
-  // List header — Phase 3 will replace with breadcrumbs
+  // List header with breadcrumb
   const header = el('div', { class: 'list-header' });
-  header.appendChild(el('div', { class: 'list-title', text: '代理列表' }));
+  header.appendChild(renderBreadcrumb());
   card.appendChild(header);
 
   // Compute displayed list
@@ -1284,11 +1339,72 @@ function renderLevelTag(p) {
   return el('span', { class: 'level-tag level-' + lv, text: text });
 }
 
-/* Drill into a team — Phase 3 fully wires breadcrumb behavior. */
+/* Drill into a team — push agent onto breadcrumb. */
 function drillIntoTeam(agent) {
-  State.breadcrumb.push({ id: agent.id, name: agent.name });
+  // Avoid duplicate push if user accidentally re-clicks
+  const last = State.breadcrumb[State.breadcrumb.length - 1];
+  if (!last || last.id !== agent.id) {
+    State.breadcrumb.push({ id: agent.id, name: agent.name });
+  }
   State.agents.page = 1;
+  // Reset sort so listing the new team starts fresh; keep search untouched.
   renderApp();
+}
+
+/* ============================================================
+ * Breadcrumb
+ * ============================================================ */
+function renderBreadcrumb() {
+  const wrap = el('div', { class: 'breadcrumb' });
+
+  // Root: 代理列表
+  const root = el('span', {
+    class: 'crumb-root',
+    text: '代理列表',
+    onclick: function () {
+      // Clear all crumbs → back to home
+      State.breadcrumb = [];
+      State.agents.page = 1;
+      renderApp();
+    },
+  });
+  wrap.appendChild(root);
+
+  // Separators + crumb items
+  State.breadcrumb.forEach(function (c, idx) {
+    wrap.appendChild(el('span', { class: 'crumb-sep', text: '>' }));
+    const isLast = (idx === State.breadcrumb.length - 1);
+    if (isLast) {
+      const lastSpan = el('span', { class: 'crumb-item last' });
+      lastSpan.appendChild(document.createTextNode(c.name));
+      lastSpan.appendChild(el('span', {
+        class: 'crumb-close',
+        title: '关闭',
+        text: '×',
+        onclick: function (ev) {
+          ev.stopPropagation();
+          // Pop last crumb
+          State.breadcrumb.pop();
+          State.agents.page = 1;
+          renderApp();
+        },
+      }));
+      wrap.appendChild(lastSpan);
+    } else {
+      wrap.appendChild(el('span', {
+        class: 'crumb-item',
+        text: c.name,
+        onclick: function () {
+          // Truncate to this position; clicked item becomes the last
+          State.breadcrumb = State.breadcrumb.slice(0, idx + 1);
+          State.agents.page = 1;
+          renderApp();
+        },
+      }));
+    }
+  });
+
+  return wrap;
 }
 
 /* Generic pagination renderer. onChange(newPage, newPageSize | null) */
