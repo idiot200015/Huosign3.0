@@ -574,6 +574,12 @@ const State = {
     page: 1,
     pageSize: 20,
   },
+  bonus: {
+    orderInput: '',                // current input value (uncommitted)
+    queriedOrder: '',              // order id that has been searched (drives results)
+    page: 1,
+    pageSize: 20,
+  },
   modal: null,                     // { type, payload }
 };
 
@@ -595,6 +601,8 @@ const Mock = {
  * Utilities
  * ============================================================ */
 function el(tag, attrs, children) {
+  // Allow shorthand: el(tag, [child, child]) treats array as children, no attrs
+  if (Array.isArray(attrs)) { children = attrs; attrs = null; }
   const node = document.createElement(tag);
   if (attrs) {
     for (const k in attrs) {
@@ -866,7 +874,7 @@ function avatarColor(seed) {
 const Pages = {
   agents:       { label: '代理列表',  render: renderAgentsPage },
   settlements:  { label: '结算记录',  render: renderSettlementsPage },
-  bonus:        { label: '奖金流水',  render: renderBonusPagePlaceholder },
+  bonus:        { label: '奖金流水',  render: renderBonusPage },
 };
 
 function renderNav() {
@@ -900,10 +908,106 @@ function renderApp() {
   renderModal();
 }
 
-/* Placeholder for pages still to be implemented */
-function renderBonusPagePlaceholder(root) {
-  root.appendChild(el('div', { class: 'page-placeholder' },
-    '【奖金流水】将在 Phase 5 实现'));
+/* ============================================================
+ * Bonus flow page
+ * ============================================================ */
+function renderBonusPage(root) {
+  // Page top bar
+  const top = el('div', { class: 'page-top' });
+  top.appendChild(el('h2', { text: '奖金流水' }));
+  root.appendChild(top);
+
+  // Search bar — ONLY order number input + search button
+  const bar = el('div', { class: 'search-bar' });
+  bar.appendChild(el('div', { class: 'search-field' }, [
+    el('label', { text: '订单号' }),
+    el('input', {
+      class: 'input', type: 'text', placeholder: '请输入订单号',
+      style: 'width: 260px;',
+      value: State.bonus.orderInput,
+      oninput: function (ev) { State.bonus.orderInput = ev.target.value; },
+      onkeydown: function (ev) {
+        if (ev.key === 'Enter') {
+          State.bonus.queriedOrder = State.bonus.orderInput.trim();
+          State.bonus.page = 1;
+          renderApp();
+        }
+      },
+    }),
+  ]));
+  bar.appendChild(el('button', {
+    class: 'btn btn-primary', type: 'button',
+    onclick: function () {
+      State.bonus.queriedOrder = State.bonus.orderInput.trim();
+      State.bonus.page = 1;
+      renderApp();
+    },
+  }, '搜索'));
+  root.appendChild(bar);
+
+  // Results card
+  const card = el('div', { class: 'list-card' });
+
+  // Empty default: no order queried yet → empty state
+  if (!State.bonus.queriedOrder) {
+    card.appendChild(el('div', { class: 'empty', text: '请输入订单号查询关联奖励' }));
+    root.appendChild(card);
+    return;
+  }
+
+  const records = Mock.bonusByOrder[State.bonus.queriedOrder] || [];
+  const total = records.length;
+  const ps = State.bonus.pageSize;
+  const page = clampPage(State.bonus.page, total, ps);
+  const slice = records.slice((page - 1) * ps, (page - 1) * ps + ps);
+
+  card.appendChild(renderBonusTable(slice));
+  card.appendChild(renderPagination(total, page, ps, function (newPage, newSize) {
+    if (newSize != null) {
+      State.bonus.pageSize = newSize;
+      State.bonus.page = 1;
+    } else {
+      State.bonus.page = newPage;
+    }
+    renderApp();
+  }));
+  root.appendChild(card);
+}
+
+function renderBonusTable(items) {
+  const table = el('table', { class: 'data-table' });
+  const thead = el('thead');
+  const tr = el('tr');
+  ['时间', '奖励用户', '手机号', '金额'].forEach(function (h) {
+    tr.appendChild(el('th', { text: h }));
+  });
+  thead.appendChild(tr);
+  table.appendChild(thead);
+
+  const tbody = el('tbody');
+  if (!items.length) {
+    const r = el('tr');
+    r.appendChild(el('td', { colspan: '4' }, [el('div', { class: 'empty', text: '该订单暂无关联奖励记录' })]));
+    tbody.appendChild(r);
+  } else {
+    items.forEach(function (rec) {
+      const p = Mock.people[rec.userId];
+      const r = el('tr');
+      r.appendChild(el('td', { text: fmtDateTime(rec.time) }));
+      r.appendChild(el('td', [
+        el('div', { class: 'user-cell' }, [
+          el('div', { class: 'avatar', style: 'background:' + avatarColor(p.id), text: p.avatar }),
+          el('span', { class: 'nickname', text: p.name }),
+        ]),
+      ]));
+      r.appendChild(el('td', { text: p.phone }));
+      // 金额：纯文字，无颜色，无 + 号
+      r.appendChild(el('td', { text: '¥' + rec.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }));
+      tbody.appendChild(r);
+    });
+  }
+  table.appendChild(tbody);
+  return table;
 }
 
 /* ============================================================
