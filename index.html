@@ -394,10 +394,11 @@
     border-top: 1px solid #f0f1f3;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 10px;
+    justify-content: flex-end;
+    gap: 20px;
     flex-wrap: nowrap;
   }
+  .pagination .page-buttons { gap: 6px; }
   .page-size select {
     height: 30px;
     border: 1px solid #d1d5db;
@@ -2276,11 +2277,16 @@ function renderBreadcrumb() {
   return wrap;
 }
 
-/* Generic pagination renderer. onChange(newPage, newPageSize | null) */
+/* Generic pagination renderer. Right-aligned, order:
+ * 共 X 条  →  每页 N 条  →  ‹ 上一页  1  2  ...  下一页 ›
+ * onChange(newPage, newPageSize | null) */
 function renderPagination(total, page, pageSize, onChange) {
   const wrap = el('div', { class: 'pagination' });
 
-  // Left: page-size selector
+  // 1. 共 X 条
+  wrap.appendChild(el('div', { class: 'page-total', text: '共 ' + total.toLocaleString('en-US') + ' 条' }));
+
+  // 2. 每页条数选择器
   const sizeWrap = el('div', { class: 'page-size' });
   const select = el('select', {
     onchange: function (ev) {
@@ -2295,7 +2301,7 @@ function renderPagination(total, page, pageSize, onChange) {
   sizeWrap.appendChild(select);
   wrap.appendChild(sizeWrap);
 
-  // Middle: page buttons
+  // 3. 分页按钮
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const pBtns = el('div', { class: 'page-buttons' });
   pBtns.appendChild(el('button', {
@@ -2325,9 +2331,6 @@ function renderPagination(total, page, pageSize, onChange) {
     onclick: function () { if (page < totalPages) onChange(page + 1, null); },
   }, '下一页 ›'));
   wrap.appendChild(pBtns);
-
-  // Right: total count
-  wrap.appendChild(el('div', { class: 'page-total', text: '共 ' + total.toLocaleString('en-US') + ' 条' }));
 
   return wrap;
 }
