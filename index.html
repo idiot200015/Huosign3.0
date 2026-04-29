@@ -1215,6 +1215,15 @@ function renderBonusPage(root) {
       renderApp();
     },
   }, '搜索'));
+  bar.appendChild(el('button', {
+    class: 'btn', type: 'button',
+    onclick: function () {
+      State.bonus.orderInput = '';
+      State.bonus.queriedOrder = '';
+      State.bonus.page = 1;
+      renderApp();
+    },
+  }, '重置'));
   root.appendChild(bar);
 
   // Results card
@@ -1387,6 +1396,14 @@ function renderPendingSearchBar() {
       renderApp();
     },
   }, '搜索'));
+  bar.appendChild(el('button', {
+    class: 'btn', type: 'button',
+    onclick: function () {
+      State.settlements.pendingSearch = { phone: '', name: '' };
+      State.settlements.page = 1;
+      renderApp();
+    },
+  }, '重置'));
   return bar;
 }
 
@@ -1432,6 +1449,14 @@ function renderApprovedSearchBar() {
       renderApp();
     },
   }, '搜索'));
+  bar.appendChild(el('button', {
+    class: 'btn', type: 'button',
+    onclick: function () {
+      State.settlements.approvedSearch = { phone: '', name: '', dateFrom: '', dateTo: '' };
+      State.settlements.page = 1;
+      renderApp();
+    },
+  }, '重置'));
   return bar;
 }
 
@@ -2049,6 +2074,14 @@ function renderAgentSearchBar() {
       renderApp();
     },
   }, '搜索'));
+  bar.appendChild(el('button', {
+    class: 'btn', type: 'button',
+    onclick: function () {
+      State.agents.search = { phone: '', name: '', dateFrom: '', dateTo: '', cycleFrom: '', cycleTo: '' };
+      State.agents.page = 1;
+      renderApp();
+    },
+  }, '重置'));
 
   return bar;
 }
