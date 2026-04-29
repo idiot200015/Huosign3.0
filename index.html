@@ -688,7 +688,7 @@ const State = {
     showDatePopover: false,
     draftCustomStart: '',          // string in datetime-local format with seconds
     draftCustomEnd: '',
-    search: { phone: '', name: '', dateFrom: '', dateTo: '' },
+    search: { phone: '', name: '', dateFrom: '', dateTo: '', cycleFrom: '', cycleTo: '' },
     sortKey: '',                   // column key
     sortDir: 'desc',               // 'asc' | 'desc'
     page: 1,
@@ -1755,6 +1755,17 @@ function getDisplayedPeople() {
 /* Apply search-bar filters to the people list */
 function applyAgentSearch(list) {
   const s = State.agents.search;
+  // Convert cycle month range (if given) to a [start, end) Date range
+  let cycleRange = null;
+  if (s.cycleFrom || s.cycleTo) {
+    const sm = s.cycleFrom || s.cycleTo;
+    const em = s.cycleTo || s.cycleFrom;
+    if (/^\d{4}-\d{2}$/.test(sm) && /^\d{4}-\d{2}$/.test(em)) {
+      let a = sm, b = em;
+      if (a > b) { a = em; b = sm; }
+      cycleRange = monthStringToRange(a, b);
+    }
+  }
   return list.filter(function (p) {
     if (s.phone && !p.phone.includes(s.phone)) return false;
     if (s.name && !p.name.includes(s.name)) return false;
@@ -1767,6 +1778,11 @@ function applyAgentSearch(list) {
       const endOfDay = new Date(s.dateTo);
       endOfDay.setHours(23, 59, 59, 999);
       if (p.becomeAgentTime.getTime() > endOfDay.getTime()) return false;
+    }
+    if (cycleRange) {
+      if (!p.becomeAgentTime) return false;
+      const t = p.becomeAgentTime.getTime();
+      if (t < cycleRange.start.getTime() || t >= cycleRange.end.getTime()) return false;
     }
     return true;
   });
@@ -1805,14 +1821,10 @@ function applyAgentSort(list) {
 }
 
 function renderAgentsPage(root) {
-  const isTeamDetail = State.breadcrumb.length > 0;
-
-  // 团队详情页（面包屑非空）只展示：搜索栏 + 列表 + 分页。
-  // 首页代理列表（面包屑为空）展示：时间筛选 + 指标卡片 + 搜索栏 + 列表 + 分页。
-  if (!isTeamDetail) {
-    root.appendChild(renderTimeFilterRow());
-    root.appendChild(renderMetricCards());
-  }
+  // 时间筛选 + 数据指标始终显示（全局视图）。
+  // 面包屑 + 列表 + 分页 随下钻变化（当前查看层级）。
+  root.appendChild(renderTimeFilterRow());
+  root.appendChild(renderMetricCards());
   root.appendChild(renderAgentSearchBar());
   root.appendChild(renderAgentListCard());
 }
@@ -1996,6 +2008,16 @@ function renderAgentSearchBar() {
     value: s.dateTo,
     onchange: function (ev) { s.dateTo = ev.target.value; },
   });
+  const cycleFromInput = el('input', {
+    class: 'input', type: 'month',
+    value: s.cycleFrom,
+    onchange: function (ev) { s.cycleFrom = ev.target.value; },
+  });
+  const cycleToInput = el('input', {
+    class: 'input', type: 'month',
+    value: s.cycleTo,
+    onchange: function (ev) { s.cycleTo = ev.target.value; },
+  });
 
   bar.appendChild(el('div', { class: 'search-field' }, [
     el('label', { text: '手机号' }), phoneInput,
@@ -2009,6 +2031,14 @@ function renderAgentSearchBar() {
       fromInput,
       el('span', { text: '-' }),
       toInput,
+    ]),
+  ]));
+  bar.appendChild(el('div', { class: 'search-field' }, [
+    el('label', { text: '邀请与奖励周期' }),
+    el('div', { class: 'date-range' }, [
+      cycleFromInput,
+      el('span', { text: '-' }),
+      cycleToInput,
     ]),
   ]));
   bar.appendChild(el('button', {
