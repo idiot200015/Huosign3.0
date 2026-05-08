@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=375, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>火象社区 · 首页</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          brand: '#E72737',
+          'brand-pressed': '#C51826',
+          warn: '#FF9F1C',
+          info: '#3A86FF',
+          success: '#2DC771',
+          error: '#F44336',
+          t1: '#333333',
+          t2: '#666666',
+          t3: '#999999',
+          disable: '#D1D1D1',
+          divider: '#E9EDF4',
+          cardbg: '#F0F2F8',
+          pagebg: '#F8F9FC',
+        },
+      },
+    },
+  };
+</script>
+<style>
+  * { -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+    background: #cccccc;
+    color: #333;
+    -webkit-font-smoothing: antialiased;
+  }
+  .font-num { font-family: 'DIN Alternate', 'Helvetica Neue', 'Roboto', sans-serif; font-feature-settings: 'tnum'; }
+
+  .device {
+    width: 375px;
+    min-height: 812px;
+    margin: 0 auto;
+    background: #F8F9FC;
+    position: relative;
+    padding-bottom: 64px;
+  }
+
+  /* 顶部导航 */
+  .topbar {
+    height: 44px;
+    background: #fff;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px;
+    position: sticky; top: 0; z-index: 30;
+    border-bottom: 1px solid #f3f4f8;
+  }
+
+  /* Banner */
+  .banner-wrap { padding: 12px 16px 8px; }
+  .banner {
+    position: relative; width: 100%; height: 120px;
+    border-radius: 12px; overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+  }
+  .banner-slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
+    padding: 0 20px;
+    color: #fff;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  .banner-slide.active { opacity: 1; }
+  .banner-slide:nth-child(1) { background: linear-gradient(135deg, #E72737 0%, #FF6B6B 100%); }
+  .banner-slide:nth-child(2) { background: linear-gradient(135deg, #3A86FF 0%, #5FA3FF 100%); }
+  .banner-slide:nth-child(3) { background: linear-gradient(135deg, #FF9F1C 0%, #FFB955 100%); }
+  .banner-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    background: rgba(255,255,255,0.22);
+    border-radius: 4px;
+    font-size: 10px;
+  }
+  .banner-dots {
+    position: absolute; bottom: 8px; left: 0; right: 0;
+    display: flex; justify-content: center; gap: 4px;
+  }
+  .banner-dot {
+    width: 4px; height: 4px; border-radius: 2px;
+    background: rgba(255,255,255,0.5);
+    transition: all 0.3s ease;
+  }
+  .banner-dot.active { width: 14px; background: #fff; }
+
+  /* mini cards */
+  .mini-cards {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 4px 16px 8px;
+  }
+  .mini-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 12px;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition: opacity 0.15s;
+  }
+  .mini-card:active { opacity: 0.85; }
+
+  /* 进度条 */
+  .progress { height: 6px; border-radius: 3px; background: #F0F2F8; overflow: hidden; }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #E72737 0%, #FF6B6B 100%);
+    border-radius: 3px;
+    transition: width 0.3s;
+  }
+
+  /* 快捷入口 */
+  .quick { display: flex; gap: 8px; padding: 4px 16px 8px; }
+  .quick-item {
+    flex: 1;
+    background: #fff;
+    border-radius: 12px;
+    padding: 12px 0 10px;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    text-decoration: none;
+    color: #333;
+    transition: opacity 0.15s;
+  }
+  .quick-item:active { opacity: 0.85; }
+  .quick-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* 专栏 */
+  .section { background: #fff; margin-top: 8px; }
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 16px 12px;
+  }
+  .section-title-bar {
+    display: inline-block; width: 3px; height: 14px;
+    background: #E72737; border-radius: 2px;
+    vertical-align: middle; margin-right: 8px;
+  }
+
+  .article {
+    display: block;
+    padding: 12px 16px;
+    border-bottom: 1px solid #E9EDF4;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.15s;
+  }
+  .article:last-child { border-bottom: none; }
+  .article:active { background: #FAFBFE; }
+
+  .badge-pin {
+    display: inline-block;
+    padding: 1px 6px;
+    background: #E72737;
+    color: #fff;
+    font-size: 10px;
+    border-radius: 4px;
+    line-height: 16px;
+    margin-right: 6px;
+  }
+
+  /* 头像 V 标 */
+  .avatar {
+    position: relative;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #E72737, #FF6B6B);
+    color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600;
+    flex-shrink: 0;
+  }
+  .v-badge {
+    position: absolute; right: -2px; bottom: -2px;
+    width: 12px; height: 12px;
+    background: #FF9F1C;
+    border: 1.5px solid #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .v-badge::after {
+    content: 'V';
+    color: #fff;
+    font-size: 8px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  /* 配图占位 */
+  .article-cover {
+    width: 100%;
+    height: 160px;
+    border-radius: 8px;
+    margin-top: 8px;
+    background: linear-gradient(135deg, #FFE5E8 0%, #FFD0A8 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .article-cover-2 {
+    background: linear-gradient(135deg, #DCEBFF 0%, #B5D4FF 100%);
+  }
+  .article-cover .ph {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,0.85);
+    font-size: 28px; font-weight: 700;
+    letter-spacing: 4px;
+  }
+
+  /* 底部 Tab */
+  .tabbar {
+    position: fixed; bottom: 0;
+    left: 50%; transform: translateX(-50%);
+    width: 375px; height: 56px;
+    background: #fff;
+    border-top: 1px solid #E9EDF4;
+    display: flex;
+    z-index: 100;
+  }
+  .tab-item {
+    flex: 1;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2px;
+    color: #999;
+    font-size: 10px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .tab-item.active { color: #E72737; }
+  .tab-item:active { opacity: 0.7; }
+</style>
+</head>
+<body>
+<div class="device">
+
+  <!-- 顶部导航 -->
+  <header class="topbar">
+    <div class="text-[18px] font-semibold text-t1">火象社区</div>
+    <a href="_placeholder.html" class="relative inline-flex p-1.5">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+      </svg>
+      <span class="absolute -top-0.5 -right-1 min-w-[16px] h-4 px-1 bg-brand text-white rounded-full text-[10px] leading-4 text-center font-medium">3</span>
+    </a>
+  </header>
+
+  <!-- 运营 Banner -->
+  <div class="banner-wrap">
+    <div class="banner" id="banner">
+      <div class="banner-slide active">
+        <span class="banner-tag">活动 · 2026-05</span>
+        <div class="text-[18px] font-semibold mt-1">五月训练加倍周</div>
+        <div class="text-[12px] opacity-90 mt-0.5">完成实训任务 XP × 2 · 限时 7 天</div>
+      </div>
+      <div class="banner-slide">
+        <span class="banner-tag">新人专享</span>
+        <div class="text-[18px] font-semibold mt-1">7 天免费体验金</div>
+        <div class="text-[12px] opacity-90 mt-0.5">领取 $1,000 实训账户立即开练</div>
+      </div>
+      <div class="banner-slide">
+        <span class="banner-tag">邀请有奖</span>
+        <div class="text-[18px] font-semibold mt-1">邀请好友赚 ¥58</div>
+        <div class="text-[12px] opacity-90 mt-0.5">首邀奖励翻倍 · 上不封顶</div>
+      </div>
+      <div class="banner-dots">
+        <span class="banner-dot active"></span>
+        <span class="banner-dot"></span>
+        <span class="banner-dot"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 等级 / 实训账户 简卡 -->
+  <div class="mini-cards">
+    <a href="_placeholder.html" class="mini-card">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-[12px] text-t2">我的等级</span>
+        <span class="inline-flex items-center px-1.5 py-px bg-[#FFF1F2] text-brand rounded text-[10px] font-semibold">Lv 3</span>
+      </div>
+      <div class="flex items-baseline gap-1 mb-1.5">
+        <span class="font-num text-[18px] font-semibold text-t1">230</span>
+        <span class="font-num text-[12px] text-t3">/ 630 XP</span>
+      </div>
+      <div class="progress">
+        <div class="progress-fill" style="width: 36.5%;"></div>
+      </div>
+    </a>
+
+    <a href="_placeholder.html" class="mini-card">
+      <div class="flex items-center justify-between mb-1.5">
+        <span class="text-[12px] text-t2">实训 <span class="font-num">$5,000</span></span>
+        <span class="inline-flex items-center gap-1 text-[10px] text-success">
+          <span class="w-1.5 h-1.5 rounded-full bg-success"></span>运行中
+        </span>
+      </div>
+      <div class="font-num text-[18px] font-semibold text-t1">$5,234.56</div>
+      <div class="font-num text-[12px] text-success mt-0.5">+$120.00 ↑</div>
+    </a>
+  </div>
+
+  <!-- 快捷入口 -->
+  <div class="quick">
+    <a href="04-训练.html" class="quick-item">
+      <div class="quick-icon" style="background: #FFF1F2;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E72737" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+      </div>
+      <span class="text-[12px] text-t1">训练</span>
+    </a>
+    <a href="_placeholder.html" class="quick-item">
+      <div class="quick-icon" style="background: #E8F1FF;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3A86FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+        </svg>
+      </div>
+      <span class="text-[12px] text-t1">学习</span>
+    </a>
+    <a href="_placeholder.html" class="quick-item">
+      <div class="quick-icon" style="background: #FFF6E5;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF9F1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M19 8v6"/>
+          <path d="M22 11h-6"/>
+        </svg>
+      </div>
+      <span class="text-[12px] text-t1">邀请</span>
+    </a>
+  </div>
+
+  <!-- 火象专栏 -->
+  <section class="section">
+    <div class="section-header">
+      <div class="flex items-center">
+        <span class="section-title-bar"></span>
+        <span class="text-[16px] font-semibold text-t1">火象专栏</span>
+        <span class="ml-2 text-[10px] text-t3">官方出品</span>
+      </div>
+      <a href="_placeholder.html" class="inline-flex items-center gap-0.5 text-[12px] text-t3 no-underline">
+        查看全部
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+    </div>
+
+    <!-- 文章 1：置顶，无图 -->
+    <a href="_placeholder.html" class="article">
+      <div class="flex items-center mb-2">
+        <div class="avatar"><span>火</span><span class="v-badge"></span></div>
+        <div class="ml-2 flex-1 min-w-0">
+          <div class="text-[14px] text-t1 font-medium leading-tight">火象官方</div>
+          <div class="text-[10px] text-t3 mt-0.5">火象研究院 · 2 小时前</div>
+        </div>
+      </div>
+      <div class="text-[16px] font-medium text-t1 leading-snug mb-1">
+        <span class="badge-pin">置顶</span>2026 五月策略：震荡市该如何控仓？
+      </div>
+      <div class="text-[14px] text-t2 leading-relaxed line-clamp-2">震荡行情下，控仓比择时更重要。本文从三个真实案例切入，拆解仓位管理的 4 个核心动作，新手也能照着做……</div>
+      <div class="flex items-center gap-3 mt-2 text-[10px] text-t3 font-num">
+        <span>浏览 12,438</span>
+        <span>·</span>
+        <span>点赞 326</span>
+      </div>
+    </a>
+
+    <!-- 文章 2：置顶，有图 -->
+    <a href="_placeholder.html" class="article">
+      <div class="flex items-center mb-2">
+        <div class="avatar" style="background: linear-gradient(135deg, #FF9F1C, #FFB955);"><span>策</span><span class="v-badge"></span></div>
+        <div class="ml-2 flex-1 min-w-0">
+          <div class="text-[14px] text-t1 font-medium leading-tight">火象策略</div>
+          <div class="text-[10px] text-t3 mt-0.5">官方策略 · 5 小时前</div>
+        </div>
+      </div>
+      <div class="text-[16px] font-medium text-t1 leading-snug mb-1">
+        <span class="badge-pin">置顶</span>新手实训第 1 课：从 0 到 1 搭建你的训练计划
+      </div>
+      <div class="text-[14px] text-t2 leading-relaxed line-clamp-2">很多人开练就上手做单，结果亏完才意识到没目标。我们整理了一份 10 分钟可做的训练计划模板……</div>
+      <div class="article-cover">
+        <div class="ph">实训 · 入门</div>
+      </div>
+      <div class="flex items-center gap-3 mt-2 text-[10px] text-t3 font-num">
+        <span>浏览 8,621</span>
+        <span>·</span>
+        <span>点赞 214</span>
+      </div>
+    </a>
+
+    <!-- 文章 3：无图 -->
+    <a href="_placeholder.html" class="article">
+      <div class="flex items-center mb-2">
+        <div class="avatar" style="background: linear-gradient(135deg, #3A86FF, #5FA3FF);"><span>研</span><span class="v-badge"></span></div>
+        <div class="ml-2 flex-1 min-w-0">
+          <div class="text-[14px] text-t1 font-medium leading-tight">火象研究</div>
+          <div class="text-[10px] text-t3 mt-0.5">研究观点 · 1 天前</div>
+        </div>
+      </div>
+      <div class="text-[16px] font-medium text-t1 leading-snug mb-1">非农数据出炉，4 月就业超预期，意味着什么？</div>
+      <div class="text-[14px] text-t2 leading-relaxed line-clamp-2">本月非农新增 22.3 万人，远超预期 18 万。这一组数据释放了 3 个关键信号，对后续行情的影响……</div>
+      <div class="flex items-center gap-3 mt-2 text-[10px] text-t3 font-num">
+        <span>浏览 4,257</span>
+        <span>·</span>
+        <span>点赞 98</span>
+      </div>
+    </a>
+
+    <!-- 文章 4：有图 -->
+    <a href="_placeholder.html" class="article">
+      <div class="flex items-center mb-2">
+        <div class="avatar" style="background: linear-gradient(135deg, #2DC771, #6FE3A2);"><span>课</span><span class="v-badge"></span></div>
+        <div class="ml-2 flex-1 min-w-0">
+          <div class="text-[14px] text-t1 font-medium leading-tight">火象课堂</div>
+          <div class="text-[10px] text-t3 mt-0.5">学习内容 · 2 天前</div>
+        </div>
+      </div>
+      <div class="text-[16px] font-medium text-t1 leading-snug mb-1">实训和模拟到底有什么区别？看完这 1 张图就懂</div>
+      <div class="text-[14px] text-t2 leading-relaxed line-clamp-2">不少同学还在纠结模拟和实训怎么选。本文用一张对比图 + 3 个真实数据，帮你 30 秒做决定……</div>
+      <div class="article-cover article-cover-2">
+        <div class="ph">实训 vs 模拟</div>
+      </div>
+      <div class="flex items-center gap-3 mt-2 text-[10px] text-t3 font-num">
+        <span>浏览 6,135</span>
+        <span>·</span>
+        <span>点赞 178</span>
+      </div>
+    </a>
+
+    <!-- 文章 5：无图 -->
+    <a href="_placeholder.html" class="article">
+      <div class="flex items-center mb-2">
+        <div class="avatar" style="background: linear-gradient(135deg, #FF6B6B, #FF9F1C);"><span>访</span><span class="v-badge"></span></div>
+        <div class="ml-2 flex-1 min-w-0">
+          <div class="text-[14px] text-t1 font-medium leading-tight">火象访谈</div>
+          <div class="text-[10px] text-t3 mt-0.5">用户故事 · 3 天前</div>
+        </div>
+      </div>
+      <div class="text-[16px] font-medium text-t1 leading-snug mb-1">90 后用户访谈：我用 6 个月把实训净值做到 +18%</div>
+      <div class="text-[14px] text-t2 leading-relaxed line-clamp-2">"我不是天赋型选手，只是把训练当工作来做。" 听阿哲讲他从 Lv1 到 Lv4 的实训复盘……</div>
+      <div class="flex items-center gap-3 mt-2 text-[10px] text-t3 font-num">
+        <span>浏览 2,810</span>
+        <span>·</span>
+        <span>点赞 67</span>
+      </div>
+    </a>
+
+    <div style="height: 8px;"></div>
+  </section>
+
+  <div style="height: 16px;"></div>
+
+</div>
+
+<!-- 底部 Tab -->
+<nav class="tabbar">
+  <a class="tab-item active">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="#E72737" stroke="#E72737" stroke-width="1.5">
+      <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7h-6v7H4a1 1 0 0 1-1-1z"/>
+    </svg>
+    <span>首页</span>
+  </a>
+  <a class="tab-item" href="04-训练.html">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+    </svg>
+    <span>训练</span>
+  </a>
+  <a class="tab-item" href="_placeholder.html">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+    </svg>
+    <span>学习</span>
+  </a>
+  <a class="tab-item" href="_placeholder.html">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="8" r="4"/>
+      <path d="M4 21v-1a8 8 0 0 1 16 0v1"/>
+    </svg>
+    <span>我的</span>
+  </a>
+</nav>
+
+<script>
+  // Banner 轮播：4 秒切换
+  (function () {
+    let cur = 0;
+    const slides = document.querySelectorAll('.banner-slide');
+    const dots = document.querySelectorAll('.banner-dot');
+    function show(i) {
+      slides.forEach((s, idx) => s.classList.toggle('active', idx === i));
+      dots.forEach((d, idx) => d.classList.toggle('active', idx === i));
+    }
+    setInterval(() => {
+      cur = (cur + 1) % slides.length;
+      show(cur);
+    }, 4000);
+  })();
+</script>
+</body>
+</html>

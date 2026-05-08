@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=375, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>页面尚未实现 · 火象 3.0</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+    background: #cccccc;
+    -webkit-font-smoothing: antialiased;
+    color: #333;
+  }
+  .device {
+    width: 375px;
+    min-height: 100vh;
+    margin: 0 auto;
+    background: #F8F9FC;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 40px;
+  }
+  .icon-wrap {
+    width: 120px; height: 120px;
+    border-radius: 60px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(231, 39, 55, 0.08);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 24px;
+    position: relative;
+  }
+  .icon-wrap::before {
+    content: '';
+    position: absolute; inset: -6px;
+    border-radius: 64px;
+    background: radial-gradient(circle, rgba(231,39,55,0.08), transparent 70%);
+    z-index: -1;
+  }
+  .title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+  }
+  .desc {
+    font-size: 14px;
+    color: #999;
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+  .btn {
+    padding: 12px 36px;
+    background: #E72737;
+    color: #fff;
+    border: none;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-family: inherit;
+  }
+  .btn:active { background: #C51826; }
+  .btn-ghost {
+    margin-top: 12px;
+    padding: 10px 24px;
+    background: transparent;
+    color: #666;
+    border: none;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+</style>
+</head>
+<body>
+  <div class="device">
+    <div class="icon-wrap">
+      <svg viewBox="0 0 64 64" width="56" height="56" fill="none" stroke="#E72737" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="10" y="14" width="44" height="36" rx="4" />
+        <path d="M10 26h44" />
+        <circle cx="18" cy="20" r="1.5" fill="#E72737" />
+        <circle cx="24" cy="20" r="1.5" fill="#E72737" />
+        <path d="M22 38l6 6 12-12" />
+      </svg>
+    </div>
+    <div class="title">页面尚未实现</div>
+    <div class="desc">该页面正在火热设计中<br/>欢迎在评审反馈中告诉我们优先级</div>
+    <button class="btn" onclick="goBack()">返回上一页</button>
+    <button class="btn-ghost" onclick="goHome()">回到原型总览</button>
+  </div>
+  <script>
+    function goBack() {
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        goHome();
+      }
+    }
+    function goHome() {
+      // 在 iframe 中点击时跳到外层 index
+      try {
+        if (window.top !== window.self) {
+          window.top.location.href = 'index.html';
+          return;
+        }
+      } catch (e) {}
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>
