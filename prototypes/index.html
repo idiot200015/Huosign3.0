@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>火象 3.0 原型预览</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --brand: #E72737;
+      --brand-deep: #C51826;
+      --brand-soft-1: #FFE2E4;
+      --text-1: #333333;
+      --text-2: #666666;
+      --text-3: #999999;
+      --line: #E9EDF4;
+      --bg-page: #F8F9FC;
+      --card-bg: #F0F2F8;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      margin: 0; padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--text-1);
+      background: var(--bg-page);
+      min-height: 100vh;
+    }
+    .page-header {
+      background: linear-gradient(135deg, #FFFFFF 0%, #FFF5F6 70%, #FFE9EC 100%);
+      padding: 40px 32px 32px;
+      border-bottom: 1px solid var(--line);
+      position: relative;
+      overflow: hidden;
+    }
+    .page-header::after {
+      content: "";
+      position: absolute;
+      right: -60px; top: -60px;
+      width: 240px; height: 240px;
+      background: radial-gradient(circle, rgba(231,39,55,0.18) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .brand-logo {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #FF4757 0%, #E72737 50%, #C51826 100%);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 6px 14px rgba(231,39,55,0.32);
+    }
+    .brand-name {
+      font-size: 14px;
+      color: var(--text-2);
+      letter-spacing: 1px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .subtitle {
+      color: var(--text-2);
+      font-size: 14px;
+      max-width: 540px;
+      line-height: 22px;
+    }
+    .meta-row {
+      display: flex;
+      gap: 16px;
+      margin-top: 16px;
+      font-size: 12px;
+      color: var(--text-3);
+    }
+    .meta-pill {
+      padding: 4px 10px;
+      background: rgba(255,255,255,0.7);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px;
+    }
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-1);
+      margin: 0 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title::before {
+      content: "";
+      display: inline-block;
+      width: 3px;
+      height: 14px;
+      background: var(--brand);
+      border-radius: 2px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(375px, 1fr));
+      gap: 24px;
+      justify-items: center;
+    }
+
+    .proto-card {
+      width: 100%;
+      max-width: 411px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(15,23,42,0.06);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      overflow: hidden;
+    }
+    .proto-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 24px rgba(15,23,42,0.1);
+    }
+    .frame-wrap {
+      padding: 18px 18px 0;
+      display: flex;
+      justify-content: center;
+    }
+    .device-frame {
+      width: 375px;
+      height: 812px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 4px 14px rgba(15,23,42,0.05);
+    }
+    .device-frame iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+    .card-foot {
+      padding: 14px 18px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-1);
+    }
+    .card-desc {
+      font-size: 12px;
+      color: var(--text-3);
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .status-done {
+      background: rgba(45,199,113,0.12);
+      color: #1A8E4C;
+    }
+    .status-wip {
+      background: rgba(255,159,28,0.12);
+      color: #B36A00;
+    }
+
+    .card-actions {
+      padding: 0 18px 18px;
+      display: flex;
+      gap: 8px;
+    }
+    .btn {
+      flex: 1;
+      height: 36px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      border: 0;
+    }
+    .btn-primary {
+      background: var(--brand);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--brand-deep); }
+    .btn-ghost {
+      background: var(--card-bg);
+      color: var(--text-1);
+    }
+    .btn-ghost:hover { background: var(--line); }
+
+    .placeholder-card {
+      width: 100%;
+      max-width: 411px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(15,23,42,0.04);
+      border: 1px dashed var(--line);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 870px;
+      color: var(--text-3);
+      gap: 12px;
+    }
+    .placeholder-card .ic {
+      width: 64px; height: 64px;
+      background: var(--card-bg);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .placeholder-card .pt { font-size: 14px; }
+    .placeholder-card .ps { font-size: 12px; }
+
+    footer {
+      max-width: 1200px;
+      margin: 24px auto 40px;
+      padding: 0 32px;
+      text-align: center;
+      color: var(--text-3);
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <header class="page-header">
+    <div class="header-inner">
+      <div class="brand-row">
+        <div class="brand-logo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2C12 2 14 6 14 9C14 11 13 12 12 12C11 12 10 11 10 9C10 7 11 5 11 5C9 6 7 9 7 13C7 17.4183 9.58172 20 12 20C15 20 18 17.4183 18 13C18 9 15 5 12 2Z" fill="#fff"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-name">HUOSIGN · 火象</div>
+          <h1>火象 3.0 原型预览</h1>
+        </div>
+      </div>
+      <p class="subtitle">移动端高保真 HTML 原型集合，用于产品评审、UI 参考与开发联调。每个原型按 375 × 812 设计稿基准还原，浏览器可直接预览。</p>
+      <div class="meta-row">
+        <span class="meta-pill">📱 设计稿基准 375 × 812</span>
+        <span class="meta-pill">🎨 视觉规范 v1.0</span>
+        <span class="meta-pill">📅 更新于 2026-05-09</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <h2 class="section-title">已完成原型</h2>
+    <div class="grid">
+
+      <!-- 首页 -->
+      <article class="proto-card">
+        <div class="frame-wrap">
+          <div class="device-frame">
+            <iframe src="03-首页.html" loading="lazy" title="火象 3.0 首页"></iframe>
+          </div>
+        </div>
+        <div class="card-foot">
+          <div class="card-info">
+            <span class="card-title">首页</span>
+            <span class="card-desc">含运营 Banner、等级 / 评分简卡、实训账户、火象专栏</span>
+          </div>
+          <span class="status-badge status-done">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12L10 17L19 7" stroke="#1A8E4C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            已完成
+          </span>
+        </div>
+        <div class="card-actions">
+          <a href="03-首页.html" target="_blank" class="btn btn-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M14 4H20V10M20 4L12 12M10 4H6C4.89543 4 4 4.89543 4 6V18C4 19.1046 4.89543 20 6 20H18C19.1046 20 20 19.1046 20 18V14" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            新窗口打开
+          </a>
+          <a href="../docs/modules/03-首页Tab/01-首页主页面.md" target="_blank" class="btn btn-ghost">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M14 3H6C4.89543 3 4 3.89543 4 5V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V9M14 3L20 9M14 3V9H20" stroke="#333" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            查看 PRD
+          </a>
+        </div>
+      </article>
+
+      <!-- 占位卡：未完成原型提示 -->
+      <article class="placeholder-card">
+        <div class="ic">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M12 5V12L16 14" stroke="#999" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="#999" stroke-width="1.6"/></svg>
+        </div>
+        <div class="pt">更多原型陆续上线</div>
+        <div class="ps">启动页 / 训练 Tab / 学习 Tab / 我的 Tab ...</div>
+      </article>
+
+    </div>
+  </main>
+
+  <footer>
+    Huosign 3.0 · Prototype Preview · 仅作产品评审与 UI 参考使用
+  </footer>
+</body>
+</html>
